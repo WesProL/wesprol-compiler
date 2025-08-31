@@ -27,7 +27,7 @@ class Lexer
             case '':
                 return $this->createToken(TokenType::Eof, '');
             case '=':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $token = $this->createToken(TokenType::Equal, '==');
                     $this->readCharacter();
                 } else {
@@ -36,7 +36,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '!':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $token = $this->createToken(TokenType::NotEqual, '!=');
                     $this->readCharacter();
                 } else {
@@ -45,7 +45,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '+':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $token = $this->createToken(TokenType::PlusEquals, '+=');
                     $this->readCharacter();
                 } else {
@@ -54,7 +54,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '-':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::MinusEquals, '-=');
                 } else {
@@ -63,7 +63,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '*':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::AsteriskEquals, '*=');
                 } else {
@@ -72,9 +72,16 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '/':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::SlashEquals, '/=');
+                } elseif ($this->peekCharacter() === '/') {
+                    while ($this->character !== "\n") {
+                        $this->readCharacter();
+                    }
+                    $this->readCharacter();
+
+                    return $this->nextToken();
                 } else {
                     $token = $this->createToken(TokenType::Slash, '/');
                 }
@@ -85,9 +92,9 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '.':
-                if ($this->peekCharacter() == '.') {
+                if ($this->peekCharacter() === '.') {
                     $this->readCharacter();
-                    if ($this->peekCharacter() == '=') {
+                    if ($this->peekCharacter() === '=') {
                         $this->readCharacter();
                         $token = $this->createToken(TokenType::RangeInclusive, '..=');
                     } else {
@@ -103,7 +110,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case ':':
-                if ($this->peekCharacter() == ':') {
+                if ($this->peekCharacter() === ':') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::ColonDouble, '::');
                 } else {
@@ -140,7 +147,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '<':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::LessOrEqual, '<=');
                 } else {
@@ -149,7 +156,7 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '>':
-                if ($this->peekCharacter() == '=') {
+                if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::GreaterOrEqual, '>=');
                 } else {

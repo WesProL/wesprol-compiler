@@ -41,8 +41,10 @@ class LexerTest extends TestCase
 
         yield 'hello world' => [
             <<<'EOF'
+                // this is our namespace
                 namespace \App;
                 
+                // we include the format class from the StdLib
                 use \Standard\Format;
                 
                 class Program {
