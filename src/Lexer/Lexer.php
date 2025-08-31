@@ -163,7 +163,13 @@ class Lexer
                     $namespace .= $this->character;
                     $this->readCharacter();
                 }
-                $token = $this->createToken(TokenType::Namespace, $namespace);
+                $token = $this->createToken(TokenType::NamespaceLiteral, $namespace);
+                break;
+            case '\'':
+                $token = $this->createToken(TokenType::CharacterLiteral, $this->readCharacterSequence());
+                break;
+            case '"':
+                $token = $this->createToken(TokenType::StringLiteral, $this->readStringSequence());
                 break;
             default:
                 if ($this->isLetter($this->character)) {
@@ -175,7 +181,7 @@ class Lexer
                 if ($this->isDigit($this->character)) {
                     $number = $this->readNumber();
                     if (str_contains($number, '.')) {
-                        return $this->createToken(TokenType::Float, $number);
+                        return $this->createToken(TokenType::TFloat, $number);
                     } else {
                         return $this->createToken(TokenType::Integer, $number);
                     }
@@ -263,6 +269,44 @@ class Lexer
         }
 
         return mb_substr($this->input, $position, $length);
+    }
+
+    private function readCharacterSequence(): string
+    {
+        $literal = $this->character;
+        $this->readCharacter();
+        while ($this->character !== '\'') {
+            if ($this->character === '\\') {
+                $literal .= $this->character;
+                $this->readCharacter();
+            }
+
+            $literal .= $this->character;
+            $this->readCharacter();
+        }
+        $literal .= $this->character;
+        $this->readCharacter();
+
+        return $literal;
+    }
+
+    private function readStringSequence(): string
+    {
+        $literal = $this->character;
+        $this->readCharacter();
+        while ($this->character !== '"') {
+            if ($this->character === '\\') {
+                $literal .= $this->character;
+                $this->readCharacter();
+            }
+
+            $literal .= $this->character;
+            $this->readCharacter();
+        }
+        $literal .= $this->character;
+        $this->readCharacter();
+
+        return $literal;
     }
 
     private function isLetter(string $character): bool

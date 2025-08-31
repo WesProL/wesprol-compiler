@@ -12,12 +12,12 @@ class LexerTest extends TestCase
 {
     public static function dataProvider(): Generator
     {
-        yield 'let #1' => [
+        yield 'let' => [
             'let foo int = (1 + 2) * 3;',
             [
                 [TokenType::Let, 'let'],
                 [TokenType::Identifier, 'foo'],
-                [TokenType::Int, 'int'],
+                [TokenType::TInt, 'int'],
                 [TokenType::Assignment, '='],
                 [TokenType::ParenthesisLeft, '('],
                 [TokenType::Integer, '1'],
@@ -31,11 +31,53 @@ class LexerTest extends TestCase
         ];
 
         yield 'namespace' => [
-            'use \Std\Format;',
+            'use \Standard\Format;',
             [
                 [TokenType::Use, 'use'],
-                [TokenType::Namespace, '\Std\Format'],
+                [TokenType::NamespaceLiteral, '\Standard\Format'],
                 [TokenType::Semicolon, ';'],
+            ],
+        ];
+
+        yield 'hello world' => [
+            <<<'EOF'
+                namespace \App;
+                
+                use \Standard\Format;
+                
+                class Program {
+                    public static function main() void {    
+                        Format::println("Hello World!");
+                    }
+                }
+                EOF,
+            [
+                [TokenType::Namespace, 'namespace'],
+                [TokenType::NamespaceLiteral, '\App'],
+                [TokenType::Semicolon, ';'],
+                [TokenType::Use, 'use'],
+                [TokenType::NamespaceLiteral, '\Standard\Format'],
+                [TokenType::Semicolon, ';'],
+                [TokenType::ClassDef, 'class'],
+                [TokenType::Identifier, 'Program'],
+                [TokenType::BraceLeft, '{'],
+                [TokenType::Public, 'public'],
+                [TokenType::Static, 'static'],
+                [TokenType::Function, 'function'],
+                [TokenType::Identifier, 'main'],
+                [TokenType::ParenthesisLeft, '('],
+                [TokenType::ParenthesisRight, ')'],
+                [TokenType::TVoid, 'void'],
+                [TokenType::BraceLeft, '{'],
+                [TokenType::Identifier, 'Format'],
+                [TokenType::ColonDouble, '::'],
+                [TokenType::Identifier, 'println'],
+                [TokenType::ParenthesisLeft, '('],
+                [TokenType::StringLiteral, '"Hello World!"'],
+                [TokenType::ParenthesisRight, ')'],
+                [TokenType::Semicolon, ';'],
+                [TokenType::BraceRight, '}'],
+                [TokenType::BraceRight, '}'],
             ],
         ];
     }

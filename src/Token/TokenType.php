@@ -10,7 +10,9 @@ enum TokenType: string
     case Identifier = 'identifier';
     case Integer = 'integer';
     case Decimal = 'decimal';
-    case Namespace = 'namespace';
+    case CharacterLiteral = 'character_literal';
+    case StringLiteral = 'string_literal';
+    case NamespaceLiteral = 'namespace_literal';
     case Assignment = '=';
     case Exclamation = '!';
     case Plus = '+';
@@ -66,15 +68,16 @@ enum TokenType: string
     case New = 'new';
     case Delete = 'delete';
     case Use = 'use';
+    case Namespace = 'namespace';
 
     // type-keywords
-    case Bool = 'bool';
-    case Int = 'int';
-    case Float = 'float';
-    case Char = 'char';
-    case String = 'string';
-    case Void = 'void';
-    case Never = 'never';
+    case TBool = 'bool';
+    case TInt = 'int';
+    case TFloat = 'float';
+    case TChar = 'char';
+    case TString = 'string';
+    case TVoid = 'void';
+    case TNever = 'never';
 
     public static function lookupIdentifier(string $identifier): self
     {
@@ -101,13 +104,14 @@ enum TokenType: string
             'new' => self::New,
             'delete' => self::Delete,
             'use' => self::Use,
-            'bool' => self::Bool,
-            'int' => self::Int,
-            'float' => self::Float,
-            'char' => self::Char,
-            'string' => self::String,
-            'void' => self::Void,
-            'never' => self::Never,
+            'namespace' => self::Namespace,
+            'bool' => self::TBool,
+            'int' => self::TInt,
+            'float' => self::TFloat,
+            'char' => self::TChar,
+            'string' => self::TString,
+            'void' => self::TVoid,
+            'never' => self::TNever,
             default => self::Identifier,
         };
     }
