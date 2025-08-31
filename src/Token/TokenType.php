@@ -2,9 +2,10 @@
 
 namespace RobertWesner\Wesprol\Token;
 
+// TODO: break, continue, return, @Attributes or #[Attributes]?
+
 enum TokenType: string
 {
-    // TODO: comment tokens :)
     case Illegal = 'illegal';
     case Eof = 'EOF';
     case Identifier = 'identifier';
