@@ -3,7 +3,7 @@
 
 /*
 public static function main() void {
-    let foo = "Hello 😀";
+    let foo string = "Hello 😀";
     Format::println(foo);
 }
 */

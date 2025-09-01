@@ -30,6 +30,9 @@ class Lexer
                 if ($this->peekCharacter() === '=') {
                     $token = $this->createToken(TokenType::Equal, '==');
                     $this->readCharacter();
+                } elseif ($this->peekCharacter() === '>') {
+                    $token = $this->createToken(TokenType::MatchArrow, '=>');
+                    $this->readCharacter();
                 } else {
                     $token = $this->createToken(TokenType::Assignment, '=');
                 }
@@ -42,6 +45,10 @@ class Lexer
                 } else {
                     $token = $this->createToken(TokenType::Exclamation, '!');
                 }
+                $this->readCharacter();
+                break;
+            case '?':
+                $token = $this->createToken(TokenType::Question, '?');
                 $this->readCharacter();
                 break;
             case '+':
@@ -57,6 +64,9 @@ class Lexer
                 if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::MinusEquals, '-=');
+                } elseif ($this->peekCharacter() === '>') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::ArrayArrow, '->');
                 } else {
                     $token = $this->createToken(TokenType::Minus, '-');
                 }
@@ -88,7 +98,21 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '&':
-                $token = $this->createToken(TokenType::Ampersand, '&');
+                if ($this->peekCharacter() === '&') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::LogicAnd, '&&');
+                } else {
+                    $token = $this->createToken(TokenType::Ampersand, '&');
+                }
+                $this->readCharacter();
+                break;
+            case '|':
+                if ($this->peekCharacter() === '|') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::LogicOr, '||');
+                } else {
+                    $token = $this->createToken(TokenType::Pipe, '|');
+                }
                 $this->readCharacter();
                 break;
             case '.':

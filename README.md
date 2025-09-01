@@ -66,9 +66,20 @@ I know I'm likely talking to no one here.
 But since it will be open source, someone might decide to help out.
 Maybe some day, in a few years. Until then this is just for my personal learning.
 
-## Stack And Heap
+## Data types
 
-`int`, `float`, `bool`, `char`: will **always** be on the stack.
+- `int` is a C `long`
+- `float` is a C `double`
+- `bool` is a C `bool`
+- `char` is a custom UTF-8 character (5 bytes, yep)
+- `string` is a custom string of (not C) `char`
+- `array` is essentially a map with array capabilities, just like PHP's `array`
+- Object is an instance of a `class`
+- `type` represents any of the above types
+
+### Stack And Heap
+
+`int`, `float`, `bool`, `char`, `type`: will **always** be on the stack.
 
 `string`, `array`, Object: will **always** be on the heap and need to be manually `delete`d.
 
@@ -316,7 +327,13 @@ class Dumper {
             return "NULL";
         }
     
-        return "{}({})".format(Types::getType(data), data.toString());
+        let typeString string = Types::getType(data).toString();
+        let dataString string = data.toString();
+        defer {
+            delete typeString;
+            delete dataString;
+        };
+        return "{}({})".format(typeString, dataString);
     }
 }
 ```

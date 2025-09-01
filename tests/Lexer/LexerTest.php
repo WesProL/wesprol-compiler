@@ -82,6 +82,81 @@ class LexerTest extends TestCase
                 [TokenType::BraceRight, '}'],
             ],
         ];
+
+        yield 'if with many conditions' => [
+            <<<'EOF'
+                if (foo >= 1 && bar < 10) || faz == baz {
+                    // ...
+                }
+                EOF,
+            [
+                [TokenType::If, 'if'],
+                [TokenType::ParenthesisLeft, '('],
+                [TokenType::Identifier, 'foo'],
+                [TokenType::GreaterOrEqual, '>='],
+                [TokenType::Integer, '1'],
+                [TokenType::LogicAnd, '&&'],
+                [TokenType::Identifier, 'bar'],
+                [TokenType::LessThan, '<'],
+                [TokenType::Integer, '10'],
+                [TokenType::ParenthesisRight, ')'],
+                [TokenType::LogicOr, '||'],
+                [TokenType::Identifier, 'faz'],
+                [TokenType::Equal, '=='],
+                [TokenType::Identifier, 'baz'],
+                [TokenType::BraceLeft, '{'],
+                [TokenType::BraceRight, '}'],
+            ],
+        ];
+
+        yield 'array unknown' => [
+            <<<'EOF'
+                array<?>
+                EOF,
+            [
+                [TokenType::TArray, 'array'],
+                [TokenType::LessThan, '<'],
+                [TokenType::Question, '?'],
+                [TokenType::GreaterThan, '>'],
+            ],
+        ];
+
+        yield 'array of strings' => [
+            <<<'EOF'
+                array<string>
+                EOF,
+            [
+                [TokenType::TArray, 'array'],
+                [TokenType::LessThan, '<'],
+                [TokenType::TString, 'string'],
+                [TokenType::GreaterThan, '>'],
+            ],
+        ];
+
+        /**
+         * Example:
+         *  [
+         *      "Foo",
+         *      "Bar",
+         *      [1, 2, 3],
+         *  ]
+         */
+        yield 'array of (strings OR arrays of ints)' => [
+            <<<'EOF'
+                array<string|array<int>>
+                EOF,
+            [
+                [TokenType::TArray, 'array'],
+                [TokenType::LessThan, '<'],
+                [TokenType::TString, 'string'],
+                [TokenType::Pipe, '|'],
+                [TokenType::TArray, 'array'],
+                [TokenType::LessThan, '<'],
+                [TokenType::TInt, 'int'],
+                [TokenType::GreaterThan, '>'],
+                [TokenType::GreaterThan, '>'],
+            ],
+        ];
     }
 
     #[DataProvider('dataProvider')]
