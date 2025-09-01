@@ -13,7 +13,10 @@
             "email": "robert@wesner.io"
         }
     ],
-    "require": {},
+    "require": {
+        "php": ">=8.4",
+        "ext-mbstring": "*"
+    },
     "require-dev": {
         "phpunit/phpunit": "^12.3.7"
     }

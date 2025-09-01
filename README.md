@@ -6,7 +6,7 @@ For a lack of a better name.
 
 ## What is WesProL?
 
-An amalgamation of Go, Rust, C#, JS, and PHP syntax.
+An amalgamation of Go, Rust, C#, JS, and PHP syntax, maybe some Zig added for flavour.
 
 This ~~is~~ will be a compiler targeting C as its back-end.
 The bootstrapping process will be done entirely in PHP, for personal reasons.
@@ -66,6 +66,14 @@ I know I'm likely talking to no one here.
 But since it will be open source, someone might decide to help out.
 Maybe some day, in a few years. Until then this is just for my personal learning.
 
+## Stack And Heap
+
+`int`, `float`, `bool`, `char`: will **always** be on the stack.
+
+`string`, `array`, Object: will **always** be on the heap and need to be manually `delete`d.
+
+Simple rules, no boxing and unboxing, no nothing.
+
 ## Examples
 
 > The provided examples may change at any point in time.
@@ -101,7 +109,7 @@ class Program {
             return n;
         }
 
-        return fib($n - 1) + fib($n - 2);
+        return self::fib(n - 1) + self::fib(n - 2);
     }
 
     public static function main() void {
@@ -119,6 +127,8 @@ namespace \App;
 use \Standard\Format;
 
 class Program {
+    // Note, this leaks memory by design, strings are never cleaned up.
+    // That is fine for short-lived example processes though.
     public static function main() void {
         // Rust style ranges
         for i in 1..=100 {
@@ -214,7 +224,11 @@ class Program {
         // no (cast) shenanigans, we just have conversion methods
         let bar float = foo.toFloat();
 
-        Format::println(bar.toString());
+        // strings need to be cleaned up to not leak memory
+        let str string = bar.toString();
+        Format::println(str);
+        // cleans up the string
+        delete str;
     }
 }
 ```
@@ -230,15 +244,16 @@ class Program {
     public static function main() void {
         let myObject MyClass = new MyClass();
         
-        // what PHP couldnt give us
+        // what PHP couldn't give us
         myObject.{
             foo = 13,
             bar = 37,
-        };
+        }.doSomething();
 
         // this is equivalent to
         myObject.foo = 13;
         myObject.bar = 37;
+        myObject.doSomething();
 
         Format::println("{}{}".format(myObject.foo, myObject.bar));
 
@@ -251,6 +266,263 @@ class Program {
         delete otherObject;    
 
         Format::println(leet);
+        
+        delete leet;
     }
+}
+```
+
+### Interfaces, Stringable, Constructor
+
+```php
+namespace \App;
+
+class Foo(a int, b int = 2) : Stringable {
+    public c int = 3;
+
+    public function toString() string {
+        return "A: {}\nB: {}\nC: {}".format(this.a, this.b, this.c);
+    }
+}
+```
+
+```php
+let myObj Foo = new Foo(1).{c = 4};
+
+Format::println(myObj.toString());
+// A: 1
+// B: 2
+// C: 4
+```
+
+### Union Types
+
+```php
+namespace \App;
+
+use \Standard\Format;
+use \Standard\Types;
+
+class Dumper {
+    public static function dump(
+        // equivalent to int|float|string|Stringable|null as all scalars implement Stringable
+        data Stringable|null,
+    ) string {
+        Format::println(self::getValue(data));
+    }
+    
+    private static function getValue(data Stringable|null) string {
+        if data == null {
+            return "NULL";
+        }
+    
+        return "{}({})".format(Types::getType(data), data.toString());
+    }
+}
+```
+
+```php
+Dumper::printDump(1);       // int(1)
+Dumper::printDump(13.37);   // float(13.37)
+Dumper::printDump("Hello"); // string(Hello)
+Dumper::printDump(null);    // NULL
+```
+
+### Array Types (includes Maps, just like PHP)
+
+```php
+namespace \App;
+
+class Foo {
+    public function test(
+        myStringArray array<string>,
+        myStringIntMap array<string -> int>,
+        mapCouldHaveStringsOrArraysOfInts array<string|array<int>>,
+        arbitraryArrayMustBeExplicit array<?>,
+    ) string {
+        // ...
+    }
+}
+```
+
+### We don't want classic inheritance!
+
+There is no `extends` keyword.
+There also is no single- or multi-inheritance.
+
+We just have classes with traits.
+
+```php
+namespace \App;
+
+trait User {
+    public id int;
+    public username string; 
+}
+```
+
+```php
+namespace \App;
+
+class Administrator {
+    use User;
+
+    public function doSomethingAdministrative() void {}
+}
+```
+
+```php
+namespace \App;
+
+class User {
+    use User;
+}
+```
+
+```php
+public function getUserId(user User) int {
+    return user.id;
+}
+```
+
+```php
+public function isAdministrator(user User) bool {
+    return user instanceof Administrator;
+}
+```
+
+### Trait conflicts
+
+```php
+namespace \App;
+
+use \Standard\Process;
+
+trait LogTrait {
+    protected function log(message string) void {
+        // do the logging to file
+    }
+    
+    protected function fatal(message string) never {
+        this.log(message);
+        Process::exit(1);
+    }
+}
+```
+
+```php
+namespace \App;
+
+use \Standard\Format;
+use \Standard\Process;
+
+trait FatalTrait {
+    protected function fatal(message string) never {
+        Format::println(message);
+        Process:exit(1);
+    }
+}
+```
+
+```php
+namespace \App;
+
+class FooService {
+    use LoggerTrait { log }, FatalTrait;
+    
+    public function whatever() {
+        this.log("Test"); // LoggerTrait
+        this.fatal("OH NO!"); // FatalTrait
+    }
+}
+```
+
+### Error handling
+
+Errors are basically interfaces.
+
+They always only have one attached value, a message `string`.
+
+> I mostly came up with the syntax on my own and after the fact realized it is quite similar to Zig.
+> After taking a look at Zig, I streamlined the syntax to look saner.
+
+```php
+namespace \App\Error;
+
+error AppError;
+```
+
+```php
+namespace \App\Error;
+
+use \Standard\Error\InvalidArgumentError;
+
+error AppInvalidArgumentError : AppError, InvalidArgumentError;
+```
+
+```php
+namespace \App\Error;
+
+error AppSomethingIsNotRightError : AppError;
+```
+
+```php
+namespace \App;
+
+use \Standard\Format;
+use \Standard\Process;
+
+class Program {
+    // ! indicated this may return an error
+    private static function doSomethingRisky() !void {
+        throw AppSomethingIsNotRightError "You done goofed up.";
+    }
+    
+    // this has to still be explicitly !void
+    // since it doesn't intercept nested errors
+    // compiler will (at some point) enforce that
+    private static function mightDoSomethingRisky() !void {
+        this.doSomethingRisky();
+    }
+
+    public static function main() void {
+        mightDoSomethingRisky() catch error {
+            AppError => {
+                Format::println(error.toString());
+                Process::exit(1);
+            },
+        };
+    }
+}
+```
+
+### Deferring
+
+Taken right out of the Go cookbook.
+
+```php
+public function foo() !void {
+    let bar string = "Abc 123";
+    // bar will be automatically cleaned up no matter what
+    defer { delete bar; };
+    
+    this.doSomethingRiskyWithString(bar);
+}
+```
+
+### String memory leaks
+
+```php
+public function foo() void {
+    // this doesnt leak memory
+    let fmt string = "Foo: {}";
+    Format::println(fmt.format(1337));
+    delete fmt;
+    
+    // this would leak memory, if it were just a string, but it's a string-literal!
+    // they get automatically cleaned up once out of scope
+    // string variable assignments clone literals to gain ownership, which probably eats performance
+    // I desperately need to remember to implement it this way!
+    Format::println("Foo: {}".format(1337));
 }
 ```

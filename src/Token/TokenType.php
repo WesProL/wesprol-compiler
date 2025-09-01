@@ -2,7 +2,12 @@
 
 namespace RobertWesner\Wesprol\Token;
 
-// TODO: break, continue, return, @Attributes or #[Attributes]?
+// TODO: break, continue, return
+// TODO: self, trait (TraitDef)
+// TODO: array, ->, ?
+// TODO: as (for use-aliases)
+// TODO: => (match)
+// TODO: error (ErrorDef), throw, catch
 
 enum TokenType: string
 {
