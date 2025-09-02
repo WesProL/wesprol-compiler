@@ -19,12 +19,17 @@ enum TokenType: string
     case Minus = '-';
     case Asterisk = '*';
     case Slash = '/';
+    case Percent = '%';
     case PlusEquals = '+=';
     case MinusEquals = '-=';
     case AsteriskEquals = '*=';
     case SlashEquals = '/=';
     case Ampersand = '&';
     case Pipe = '|';
+    case Caret = '^';
+    case Tilde = '~';
+    case ShiftLeft = '<<';
+    case ShiftRight = '>>';
     case Backslash = '\\';
     case Dot = '.';
     case Comma = ',';
@@ -76,7 +81,7 @@ enum TokenType: string
     case Static = 'static';
     case ClassDef = 'class';
     case TraitDef = 'trait';
-    case ErrorDef = 'error';
+    // ErrorDef is TError, I moved it since you both need it to define and also to check
     case New = 'new';
     case Delete = 'delete';
     case Use = 'use';
@@ -85,6 +90,7 @@ enum TokenType: string
     case Throw = 'throw';
     case Catch = 'catch';
     case InstanceOf = 'instanceof';
+    case Defer = 'defer';
 
     // type-keywords
     case TBool = 'bool';
@@ -96,6 +102,7 @@ enum TokenType: string
     case TVoid = 'void';
     case TNever = 'never';
     case TType = 'type';
+    case TError = 'error';
 
     public static function lookupIdentifier(string $identifier): self
     {
@@ -125,7 +132,7 @@ enum TokenType: string
             'static' => self::Static,
             'class' => self::ClassDef,
             'trait' => self::TraitDef,
-            'error' => self::ErrorDef,
+            'error' => self::TError,
             'new' => self::New,
             'delete' => self::Delete,
             'use' => self::Use,
@@ -134,6 +141,7 @@ enum TokenType: string
             'throw' => self::Throw,
             'catch' => self::Catch,
             'instanceof' => self::InstanceOf,
+            'defer' => self::Defer,
             'bool' => self::TBool,
             'int' => self::TInt,
             'float' => self::TFloat,

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "c/strings.c"
+#include "c/strings.h"
 
 /*
 public static function main() void {

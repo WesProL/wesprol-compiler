@@ -74,14 +74,46 @@ Maybe some day, in a few years. Until then this is just for my personal learning
 - `char` is a custom UTF-8 character (5 bytes, yep)
 - `string` is a custom string of (not C) `char`
 - `array` is essentially a map with array capabilities, just like PHP's `array`
+- `error` is a **caught** error message consisting of
+  - message `string`
+  - file `string`
+  - line `int`
+  - column `int`
+  - trace `array<array{line: int, column: int, class: string, function: string, args: array<?>}>`
+  - previous `error|null`
 - Object is an instance of a `class`
 - `type` represents any of the above types
+
+## Special types
+
+### `never`
+
+- `never` is not a data type, you cannot ever store `never`
+- it is a method return type similar to `void`, not returning anything
+- it forces a method marked as returning `never` to
+  - either directly call to `\Standard\Process::exit()` which also returns `never`
+  - or call another method with return type `never`
+  - 
+- a call to a method with return type `never` does not necessary make the calling method require returning `never`
+  - only if a method **always** ends execution by **always** calling a method with return type `never` (like `Process::exit()`) should you use `never`
+- `Program::main()` **SHOULD NOT** be written with the return type `never` (it should always be `void`)
+  - since the end of `main()` only implicitly stops the program
+  - and `never` is for **explicit** code stops
+  - which aids any potential IDE in detecting dead code
+- methods with irrecoverable permanent loops **SHOULD** return `never` to signify no other code will ever run after it
+  - those methods are required to catch all runtime errors inside the loop
+
+> It is basically the PHP never type with strict compile time enforcement rather than runtime checks.
+
+> /!\ **This will be used but not enforced during the initial phase of this compiler.**
+> 
+> Implementing this ruleset requires extensive "linting" and will be implemented eventually.
 
 ### Stack And Heap
 
 `int`, `float`, `bool`, `char`, `type`: will **always** be on the stack.
 
-`string`, `array`, Object: will **always** be on the heap and need to be manually `delete`d.
+`string`, `array`, `error`, Object: will **always** be on the heap and need to be manually `delete`d.
 
 Simple rules, no boxing and unboxing, no nothing.
 
@@ -345,16 +377,22 @@ Dumper::printDump("Hello"); // string(Hello)
 Dumper::printDump(null);    // NULL
 ```
 
-### Array Types (includes Maps, just like PHP)
+### Array Types (includes Maps, just like PHP but with _more_ syntax)
 
 ```php
 namespace \App;
 
 class Foo {
     public function test(
+        // Go equivalent: []string
         myStringArray array<string>,
+        // Go equivalent: map[string]int
         myStringIntMap array<string -> int>,
+        // Go equivalent: map[string][]int
         mapCouldHaveStringsOrArraysOfInts array<string|array<int>>,
+        // Go equivalent: NONE
+        arrayWithKnownKeys array{id: int, uuid: string},
+        // Go equivalent: NONE ([string|int|float KEY] map[KEY]any)
         arbitraryArrayMustBeExplicit array<?>,
     ) string {
         // ...
@@ -503,9 +541,9 @@ class Program {
     }
 
     public static function main() void {
-        mightDoSomethingRisky() catch error {
+        mightDoSomethingRisky() catch err {
             AppError => {
-                Format::println(error.toString());
+                Format::println(err.toString());
                 Process::exit(1);
             },
         };
@@ -541,5 +579,63 @@ public function foo() void {
     // string variable assignments clone literals to gain ownership, which probably eats performance
     // I desperately need to remember to implement it this way!
     Format::println("Foo: {}".format(1337));
+}
+```
+
+### C interop
+
+```toml
+[program]
+namspace="App"
+directory="src"
+
+[interop]
+load="./c/load.h"
+```
+
+```c
+// $PROJECT_DIR$/c/load.h
+
+#include "libs/leet.h"
+```
+
+```c
+// $PROJECT_DIR$/c/libs/leet.h
+
+double leet(long x, double y) {
+    return (double)x + y;
+}
+```
+
+Identifiers starting with `$` are called "Lexer Directives".
+
+A thing I just came up with after 4 days of trying to create an interop syntax.
+
+They completely change the behaviour of the lexer until the end-sequence `$end` is encountered¹.
+
+¹ "encountering" really depends on the individual lexer directive,
+as the `$run` directive has C-string, C-char, and comment aware parsing and
+won't "encounter" `$end` inside string- or char-literals and comments.
+
+```php
+// $PROJECT_DIR$/src/Program.wes
+
+namespace \App;
+
+use \Standard\Format;
+
+class Program {
+    public static function main() void {
+        let foo int = 13;
+        let bar float = 0.37;
+
+        $pass foo as a, bar as b $end
+        $run
+            double result = leet(a, b);
+        $end
+    
+        let result float = $get result as float $end;
+        Format::println(result.toString());
+    }
 }
 ```

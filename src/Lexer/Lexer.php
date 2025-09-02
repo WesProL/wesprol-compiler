@@ -5,6 +5,8 @@ namespace RobertWesner\Wesprol\Lexer;
 use RobertWesner\Wesprol\Token\Token;
 use RobertWesner\Wesprol\Token\TokenType;
 
+// TODO: lexer directives
+
 class Lexer
 {
     private int $position = 0;
@@ -97,6 +99,10 @@ class Lexer
                 }
                 $this->readCharacter();
                 break;
+            case '%':
+                $token = $this->createToken(TokenType::Percent, '%');
+                $this->readCharacter();
+                break;
             case '&':
                 if ($this->peekCharacter() === '&') {
                     $this->readCharacter();
@@ -113,6 +119,14 @@ class Lexer
                 } else {
                     $token = $this->createToken(TokenType::Pipe, '|');
                 }
+                $this->readCharacter();
+                break;
+            case '^':
+                $token = $this->createToken(TokenType::Caret, '^');
+                $this->readCharacter();
+                break;
+            case '~':
+                $token = $this->createToken(TokenType::Tilde, '~');
                 $this->readCharacter();
                 break;
             case '.':
@@ -174,6 +188,9 @@ class Lexer
                 if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::LessOrEqual, '<=');
+                } elseif ($this->peekCharacter() === '<') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::ShiftLeft, '<<');
                 } else {
                     $token = $this->createToken(TokenType::LessThan, '<');
                 }
@@ -183,6 +200,9 @@ class Lexer
                 if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::GreaterOrEqual, '>=');
+                } elseif ($this->peekCharacter() === '>') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::ShiftRight, '>>');
                 } else {
                     $token = $this->createToken(TokenType::GreaterThan, '>');
                 }

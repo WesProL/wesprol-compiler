@@ -2,10 +2,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define T_CHARRAW_LENGTH 4
+#define T_CHAR_RAW_LENGTH 4
 
 struct T_CharRaw {
-    char bytes[T_CHARRAW_LENGTH];
+    char bytes[T_CHAR_RAW_LENGTH];
     char length;
 };
 
@@ -90,7 +90,7 @@ struct T_StringLiteral _T_StringLiteral_copy(struct T_StringLiteral src) {
 }
 
 char *_T_StringLiteral_toCString(struct T_StringLiteral literal) {
-    char *string = malloc(literal.length * T_CHARRAW_LENGTH);
+    char *string = malloc(literal.length * T_CHAR_RAW_LENGTH);
     char *s = string;
 
     struct T_StringSegment *current = literal.begin;
