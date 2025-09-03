@@ -111,25 +111,25 @@ class LexerTest extends TestCase
 
         yield 'array unknown' => [
             <<<'EOF'
-                array<?>
+                array[?]
                 EOF,
             [
                 [TokenType::TArray, 'array'],
-                [TokenType::LessThan, '<'],
+                [TokenType::SquareBracketLeft, '['],
                 [TokenType::Question, '?'],
-                [TokenType::GreaterThan, '>'],
+                [TokenType::SquareBracketRight, ']'],
             ],
         ];
 
         yield 'array of strings' => [
             <<<'EOF'
-                array<string>
+                array[string]
                 EOF,
             [
                 [TokenType::TArray, 'array'],
-                [TokenType::LessThan, '<'],
+                [TokenType::SquareBracketLeft, '['],
                 [TokenType::TString, 'string'],
-                [TokenType::GreaterThan, '>'],
+                [TokenType::SquareBracketRight, ']'],
             ],
         ];
 
@@ -143,18 +143,54 @@ class LexerTest extends TestCase
          */
         yield 'array of (strings OR arrays of ints)' => [
             <<<'EOF'
-                array<string|array<int>>
+                array[string|array[int]]
                 EOF,
             [
                 [TokenType::TArray, 'array'],
-                [TokenType::LessThan, '<'],
+                [TokenType::SquareBracketLeft, '['],
                 [TokenType::TString, 'string'],
                 [TokenType::Pipe, '|'],
                 [TokenType::TArray, 'array'],
-                [TokenType::LessThan, '<'],
+                [TokenType::SquareBracketLeft, '['],
                 [TokenType::TInt, 'int'],
-                [TokenType::GreaterThan, '>'],
-                [TokenType::GreaterThan, '>'],
+                [TokenType::SquareBracketRight, ']'],
+                [TokenType::SquareBracketRight, ']'],
+            ],
+        ];
+
+        yield 'range' => [
+            <<<'EOF'
+                for i in 0..100 {
+                    // 0 to 99
+                }
+                EOF,
+            [
+                [TokenType::For, 'for'],
+                [TokenType::Identifier, 'i'],
+                [TokenType::In, 'in'],
+                [TokenType::Integer, '0'],
+                [TokenType::Range, '..'],
+                [TokenType::Integer, '100'],
+                [TokenType::BraceLeft, '{'],
+                [TokenType::BraceRight, '}'],
+            ],
+        ];
+
+        yield 'range inclusive' => [
+            <<<'EOF'
+                for i in 0..=100 {
+                    // 0 to 100
+                }
+                EOF,
+            [
+                [TokenType::For, 'for'],
+                [TokenType::Identifier, 'i'],
+                [TokenType::In, 'in'],
+                [TokenType::Integer, '0'],
+                [TokenType::RangeInclusive, '..='],
+                [TokenType::Integer, '100'],
+                [TokenType::BraceLeft, '{'],
+                [TokenType::BraceRight, '}'],
             ],
         ];
     }

@@ -79,9 +79,11 @@ Maybe some day, in a few years. Until then this is just for my personal learning
   - file `string`
   - line `int`
   - column `int`
-  - trace `array<array{line: int, column: int, class: string, function: string, args: array<?>}>`
+  - trace `array[array{line: int, column: int, class: string, function: string, args: array[?]}]`
   - previous `error|null`
-- Object is an instance of a `class`
+- Object is any form of object
+  - an instance of a `class`
+  - ranges created by the `..` or `..=` syntax are instances of `\Standard\Range`
 - `type` represents any of the above types
 
 ## Special types
@@ -173,7 +175,7 @@ class Program {
     // Note, this leaks memory by design, strings are never cleaned up.
     // That is fine for short-lived example processes though.
     public static function main() void {
-        // Rust style ranges
+        // Rust style ranges, need to be int, cannot use float
         for i in 1..=100 {
             Format::println(
                 // if is an expression! not a statement
@@ -385,15 +387,15 @@ namespace \App;
 class Foo {
     public function test(
         // Go equivalent: []string
-        myStringArray array<string>,
+        myStringArray array[string],
         // Go equivalent: map[string]int
-        myStringIntMap array<string -> int>,
+        myStringIntMap array[string -> int],
         // Go equivalent: map[string][]int
-        mapCouldHaveStringsOrArraysOfInts array<string|array<int>>,
+        mapCouldHaveStringsOrArraysOfInts array[string|array[int]],
         // Go equivalent: NONE
         arrayWithKnownKeys array{id: int, uuid: string},
         // Go equivalent: NONE ([string|int|float KEY] map[KEY]any)
-        arbitraryArrayMustBeExplicit array<?>,
+        arbitraryArrayMustBeExplicit array[?],
     ) string {
         // ...
     }
@@ -584,24 +586,26 @@ public function foo() void {
 
 ### C interop
 
+`$PROJECT_DIR$/wesprol.toml`
 ```toml
-[program]
+[project]
+# TODO
+
+[project.source]
 namspace="App"
 directory="src"
 
-[interop]
+[project.interop]
 load="./c/load.h"
 ```
 
+`$PROJECT_DIR$/c/load.h`
 ```c
-// $PROJECT_DIR$/c/load.h
-
 #include "libs/leet.h"
 ```
 
+`$PROJECT_DIR$/c/libs/leet.h`
 ```c
-// $PROJECT_DIR$/c/libs/leet.h
-
 double leet(long x, double y) {
     return (double)x + y;
 }
@@ -615,11 +619,10 @@ They completely change the behaviour of the lexer until the end-sequence `$end` 
 
 ¹ "encountering" really depends on the individual lexer directive,
 as the `$run` directive has C-string, C-char, and comment aware parsing and
-won't "encounter" `$end` inside string- or char-literals and comments.
+won't "encounter" `$end` inside string-/char-literals and comments.
 
+`$PROJECT_DIR$/src/Program.wes`
 ```php
-// $PROJECT_DIR$/src/Program.wes
-
 namespace \App;
 
 use \Standard\Format;
