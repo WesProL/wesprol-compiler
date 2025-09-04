@@ -18,7 +18,7 @@ class LexerTest extends TestCase
                 [TokenType::Let, 'let'],
                 [TokenType::Identifier, 'foo'],
                 [TokenType::TInt, 'int'],
-                [TokenType::Assignment, '='],
+                [TokenType::Equals, '='],
                 [TokenType::ParenthesisLeft, '('],
                 [TokenType::Integer, '1'],
                 [TokenType::Plus, '+'],
@@ -43,12 +43,12 @@ class LexerTest extends TestCase
             <<<'EOF'
                 // this is our namespace
                 namespace \App;
-                
+
                 // we include the format class from the StdLib
                 use \Standard\Format;
-                
+
                 class Program {
-                    public static function main() void {    
+                    public static function main() void {
                         Format::println("Hello World!");
                     }
                 }
@@ -93,16 +93,16 @@ class LexerTest extends TestCase
                 [TokenType::If, 'if'],
                 [TokenType::ParenthesisLeft, '('],
                 [TokenType::Identifier, 'foo'],
-                [TokenType::GreaterOrEqual, '>='],
+                [TokenType::GreaterThanEquals, '>='],
                 [TokenType::Integer, '1'],
-                [TokenType::LogicAnd, '&&'],
+                [TokenType::AmpersandDouble, '&&'],
                 [TokenType::Identifier, 'bar'],
                 [TokenType::LessThan, '<'],
                 [TokenType::Integer, '10'],
                 [TokenType::ParenthesisRight, ')'],
-                [TokenType::LogicOr, '||'],
+                [TokenType::PipeDouble, '||'],
                 [TokenType::Identifier, 'faz'],
-                [TokenType::Equal, '=='],
+                [TokenType::EqualsDouble, '=='],
                 [TokenType::Identifier, 'baz'],
                 [TokenType::BraceLeft, '{'],
                 [TokenType::BraceRight, '}'],
@@ -191,6 +191,75 @@ class LexerTest extends TestCase
                 [TokenType::Integer, '100'],
                 [TokenType::BraceLeft, '{'],
                 [TokenType::BraceRight, '}'],
+            ],
+        ];
+
+        yield 'C interop #1' => [
+            <<<'EOF'
+                $pass foo as a, bar as b $end
+                EOF,
+            [
+                [TokenType::LDPass, '$pass'],
+                [TokenType::LDPassSource, 'foo'],
+                [TokenType::LDPassDestination, 'a'],
+                [TokenType::LDPassSource, 'bar'],
+                [TokenType::LDPassDestination, 'b'],
+                [TokenType::LDEnd, '$end'],
+            ],
+        ];
+
+        yield 'C interop #2' => [
+            <<<'EOF'
+                $run
+                    double result = leet(a, b);
+                $end
+                EOF,
+            [
+                [TokenType::LDRun, '$run'],
+                [TokenType::LDRunCode, ' double result = leet(a, b); '],
+                [TokenType::LDEnd, '$end'],
+            ],
+        ];
+
+        yield 'C interop #3' => [
+            <<<'EOF'
+                let result float = $get result as float $end;
+                EOF,
+            [
+                [TokenType::Let, 'let'],
+                [TokenType::Identifier, 'result'],
+                [TokenType::TFloat, 'float'],
+                [TokenType::Equals, '='],
+                [TokenType::LDGet, '$get'],
+                [TokenType::LDGetVariable, 'result'],
+                [TokenType::LDGetType, 'float'],
+                [TokenType::LDEnd, '$end'],
+                [TokenType::Semicolon, ';'],
+            ],
+        ];
+
+        yield 'C interop code literals' => [
+            <<<'EOF'
+                $run
+                    // $end
+                    /*
+                    
+                        $end me
+                    
+                    */
+                    char    test1   =   '   $end   '; // This is invalid
+                    char   *test2   =   "   $end   ";
+                    
+                    printf("%s\n   %s", test2, "")    ;
+                $end
+                EOF,
+            [
+                [TokenType::LDRun, '$run'],
+                [
+                    TokenType::LDRunCode,
+                    ' char test1 = \'   $end   \'; char *test2 = "   $end   "; printf("%s\n   %s", test2, "") ; ',
+                ],
+                [TokenType::LDEnd, '$end'],
             ],
         ];
     }

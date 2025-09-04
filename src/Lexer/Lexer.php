@@ -15,6 +15,11 @@ class Lexer
     private int $line = 1;
     private int $column = 1;
 
+    /**
+     * @var Token[]
+     */
+    private array $tokenBuffer = [];
+
     public function __construct(
         private readonly string $input,
     ) {
@@ -23,6 +28,11 @@ class Lexer
 
     public function nextToken(): Token
     {
+        // empty the buffer created by directives first
+        if (count($this->tokenBuffer) > 0) {
+            return array_shift($this->tokenBuffer);
+        }
+
         $this->eatWhitespaces();
 
         switch ($this->character) {
@@ -30,19 +40,19 @@ class Lexer
                 return $this->createToken(TokenType::Eof, '');
             case '=':
                 if ($this->peekCharacter() === '=') {
-                    $token = $this->createToken(TokenType::Equal, '==');
+                    $token = $this->createToken(TokenType::EqualsDouble, '==');
                     $this->readCharacter();
                 } elseif ($this->peekCharacter() === '>') {
-                    $token = $this->createToken(TokenType::MatchArrow, '=>');
+                    $token = $this->createToken(TokenType::EqualsGreaterThanArrow, '=>');
                     $this->readCharacter();
                 } else {
-                    $token = $this->createToken(TokenType::Assignment, '=');
+                    $token = $this->createToken(TokenType::Equals, '=');
                 }
                 $this->readCharacter();
                 break;
             case '!':
                 if ($this->peekCharacter() === '=') {
-                    $token = $this->createToken(TokenType::NotEqual, '!=');
+                    $token = $this->createToken(TokenType::NotEquals, '!=');
                     $this->readCharacter();
                 } else {
                     $token = $this->createToken(TokenType::Exclamation, '!');
@@ -68,7 +78,7 @@ class Lexer
                     $token = $this->createToken(TokenType::MinusEquals, '-=');
                 } elseif ($this->peekCharacter() === '>') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::ArrayArrow, '->');
+                    $token = $this->createToken(TokenType::MinusGreaterThanArrow, '->');
                 } else {
                     $token = $this->createToken(TokenType::Minus, '-');
                 }
@@ -106,7 +116,7 @@ class Lexer
             case '&':
                 if ($this->peekCharacter() === '&') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::LogicAnd, '&&');
+                    $token = $this->createToken(TokenType::AmpersandDouble, '&&');
                 } else {
                     $token = $this->createToken(TokenType::Ampersand, '&');
                 }
@@ -115,7 +125,7 @@ class Lexer
             case '|':
                 if ($this->peekCharacter() === '|') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::LogicOr, '||');
+                    $token = $this->createToken(TokenType::PipeDouble, '||');
                 } else {
                     $token = $this->createToken(TokenType::Pipe, '|');
                 }
@@ -187,10 +197,10 @@ class Lexer
             case '<':
                 if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::LessOrEqual, '<=');
+                    $token = $this->createToken(TokenType::LessThanEquals, '<=');
                 } elseif ($this->peekCharacter() === '<') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::ShiftLeft, '<<');
+                    $token = $this->createToken(TokenType::LessThanDouble, '<<');
                 } else {
                     $token = $this->createToken(TokenType::LessThan, '<');
                 }
@@ -199,10 +209,10 @@ class Lexer
             case '>':
                 if ($this->peekCharacter() === '=') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::GreaterOrEqual, '>=');
+                    $token = $this->createToken(TokenType::GreaterThanEquals, '>=');
                 } elseif ($this->peekCharacter() === '>') {
                     $this->readCharacter();
-                    $token = $this->createToken(TokenType::ShiftRight, '>>');
+                    $token = $this->createToken(TokenType::GreaterThanDouble, '>>');
                 } else {
                     $token = $this->createToken(TokenType::GreaterThan, '>');
                 }
@@ -221,6 +231,18 @@ class Lexer
                 break;
             case '"':
                 $token = $this->createToken(TokenType::StringLiteral, $this->readStringSequence());
+                break;
+            case '$':
+                $this->readCharacter();
+                $directive = '$' . $this->readIdentifier();
+                $this->tokenBuffer = match ($directive) {
+                    '$run' => $this->readDirectiveRun(),
+                    '$pass' => $this->readDirectivePass(),
+                    '$get' => $this->readDirectiveGet(),
+                    default => [$this->createToken(TokenType::Illegal, $directive)],
+                };
+
+                $token = array_shift($this->tokenBuffer);
                 break;
             default:
                 if ($this->isLetter($this->character)) {
@@ -358,6 +380,240 @@ class Lexer
         $this->readCharacter();
 
         return $literal;
+    }
+
+    /**
+     * @return Token[]
+     */
+    private function readDirectiveRun(): array
+    {
+        $source = "";
+        while (true) {
+            if (in_array($this->character, [' ', "\t", "\r", "\n"])) {
+                if (!str_ends_with($source, ' ')) {
+                    $source .= " ";
+                }
+                $this->eatWhitespaces();
+            }
+
+            if ($this->character === '') {
+                var_dump($source);
+                return $this->createDirectiveErrorTokens('RUN', 0);
+            }
+
+            if ($this->character === '/') {
+                switch ($this->peekCharacter()) {
+                    case '/':
+                        $this->readCharacter();
+                        $this->readCharacter();
+                        $this->readDirectiveRunCUntil("\n");
+                        $this->readCharacter();
+                        break;
+                    case '*':
+                        $this->readCharacter();
+                        $this->readCharacter();
+                        $this->readDirectiveRunCUntil('*', '/');
+                        $this->readCharacter();
+                        $this->readCharacter();
+                        break;
+                }
+            }
+
+            if ($this->character === '$') {
+                $this->readCharacter();
+                if (($this->readIdentifier()) === 'end') {
+                    break;
+                } else {
+                    return $this->createDirectiveErrorTokens('RUN', 1);
+                }
+            }
+
+            if ($this->character === '\'') {
+                $this->readCharacter();
+                $source .= '\'' . $this->readDirectiveRunCLiteralWithEscapes('\'') . '\'';;
+                $this->readCharacter();
+            }
+
+            if ($this->character === '"') {
+                $this->readCharacter();
+                $source .= '"' . $this->readDirectiveRunCLiteralWithEscapes('"') . '"';
+                $this->readCharacter();
+            }
+
+            if (in_array($this->character, [' ', "\t", "\r", "\n"])) {
+                if (!str_ends_with($source, ' ')) {
+                    $source .= " ";
+                }
+                $this->eatWhitespaces();
+            } else {
+                $source .= $this->character;
+                $this->readCharacter();
+            }
+        }
+
+        return [
+            $this->createToken(TokenType::LDRun, '$run'),
+            $this->createToken(TokenType::LDRunCode, $source),
+            $this->createToken(TokenType::LDEnd, '$end'),
+        ];
+    }
+
+    /**
+     * @return Token[]
+     */
+    private function readDirectivePass(): array
+    {
+        $parts = [];
+        do {
+            $this->eatWhitespaces();
+
+            $part = '';
+            while (true) {
+                if (in_array($this->character, [' ', "\t", "\r", "\n", ';', ',', ''])) {
+                    break;
+                }
+
+                $part .= $this->character;
+                $this->readCharacter();
+            }
+
+            $parts[] = $part;
+
+            if ($this->character === ',') {
+                $parts[] = ',';
+                $this->readCharacter();
+            }
+        } while ($part !== '$end' && $part !== '');
+
+        $chunks = [];
+        $chunk = [];
+        while ($part = array_shift($parts)) {
+            if ($part === ',') {
+                $chunks[] = $chunk;
+                $chunk = [];
+                continue;
+            }
+
+            if ($part === '$end') {
+                break;
+            }
+
+            $chunk[] = $part;
+        }
+        $chunks[] = $chunk;
+
+        if (array_any($chunks, fn($chunk) => count($chunk) !== 3)) {
+            return $this->createDirectiveErrorTokens('PASS', 0);
+        }
+
+        if (array_any($chunks, fn($chunk) => $chunk[1] !== 'as')) {
+            return $this->createDirectiveErrorTokens('PASS', 1);
+        }
+
+        return [
+            $this->createToken(TokenType::LDPass, '$pass'),
+            ...array_merge(
+                ...array_map(
+                    fn (array $chunk) => [
+                        $this->createToken(TokenType::LDPassSource, $chunk[0]),
+                        $this->createToken(TokenType::LDPassDestination, $chunk[2]),
+                    ],
+                    $chunks,
+                ),
+            ),
+            $this->createToken(TokenType::LDEnd, '$end'),
+        ];
+    }
+
+    /**
+     * @return Token[]
+     */
+    private function readDirectiveGet(): array
+    {
+        $parts = [];
+        do {
+            $this->eatWhitespaces();
+
+            $part = '';
+            while (true) {
+                if (in_array($this->character, [' ', "\t", "\r", "\n", ';', ''])) {
+                    break;
+                }
+
+                $part .= $this->character;
+                $this->readCharacter();
+            }
+
+            $parts[] = $part;
+        } while ($part !== '$end' && $part !== '');
+
+        if (count($parts) !== 4) {
+            return $this->createDirectiveErrorTokens('GET', 0);
+        }
+
+        if ($parts[1] !== 'as') {
+            return $this->createDirectiveErrorTokens('GET', 1);
+        }
+
+        if (!ctype_alnum($parts[0])) {
+            return $this->createDirectiveErrorTokens('GET', 2);
+        }
+
+        if (!in_array(TokenType::lookupIdentifier($parts[2]), TokenType::TYPES)) {
+            return $this->createDirectiveErrorTokens('GET', 3);
+        }
+
+        return [
+            $this->createToken(TokenType::LDGet, '$get'),
+            $this->createToken(TokenType::LDGetVariable, $parts[0]),
+            $this->createToken(TokenType::LDGetType, $parts[2]),
+            $this->createToken(TokenType::LDEnd, '$end'),
+        ];
+    }
+
+    private function readDirectiveRunCUntil(string $endCharacter, ?string $endPeek = null): string
+    {
+        $result = "";
+        while (true) {
+            if (
+                ($endPeek === null && $this->character === $endCharacter)
+                || ($this->character === $endCharacter && $this->peekCharacter() === $endPeek)
+                || $this->character === ''
+            ) {
+                return $result;
+            }
+
+            $result .= $this->character;
+            $this->readCharacter();
+        }
+    }
+
+    private function readDirectiveRunCLiteralWithEscapes(string $endCharacter): string
+    {
+        $result = "";
+        while (true) {
+            if ($this->character === $endCharacter || $this->character === '') {
+                return $result;
+            }
+
+            $result .= $this->character;
+            $this->readCharacter();
+
+            if ($this->character === '\\') {
+                $result .= $this->character;
+                $this->readCharacter();
+            }
+        }
+    }
+
+    private function createDirectiveErrorTokens(string $name, int $expectation): array
+    {
+        return [
+            $this->createToken(
+                TokenType::Illegal,
+                'LEXER_DIRECTIVE_' . $name . '_ERROR_EXPECTATION_' . $expectation . '_FAILED',
+            ),
+        ];
     }
 
     private function isLetter(string $character): bool

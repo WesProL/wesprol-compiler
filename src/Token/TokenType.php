@@ -12,7 +12,7 @@ enum TokenType: string
     case CharacterLiteral = 'character_literal';
     case StringLiteral = 'string_literal';
     case NamespaceLiteral = 'namespace_literal';
-    case Assignment = '=';
+    case Equals = '=';
     case Exclamation = '!';
     case Question = '?';
     case Plus = '+';
@@ -28,8 +28,8 @@ enum TokenType: string
     case Pipe = '|';
     case Caret = '^';
     case Tilde = '~';
-    case ShiftLeft = '<<';
-    case ShiftRight = '>>';
+    case LessThanDouble = '<<';
+    case GreaterThanDouble = '>>';
     case Backslash = '\\';
     case Dot = '.';
     case Comma = ',';
@@ -44,16 +44,16 @@ enum TokenType: string
     case SquareBracketRight = ']';
     case LessThan = '<';
     case GreaterThan = '>';
-    case LessOrEqual = '<=';
-    case GreaterOrEqual = '>=';
-    case Equal = '==';
-    case NotEqual = '!=';
+    case LessThanEquals = '<=';
+    case GreaterThanEquals = '>=';
+    case EqualsDouble = '==';
+    case NotEquals = '!=';
     case Range = '..';
     case RangeInclusive = '..=';
-    case MatchArrow = '=>';
-    case ArrayArrow = '->';
-    case LogicAnd = '&&';
-    case LogicOr = '||';
+    case EqualsGreaterThanArrow = '=>';
+    case MinusGreaterThanArrow = '->';
+    case AmpersandDouble = '&&';
+    case PipeDouble = '||';
 
     // keywords
     case True = 'true';
@@ -103,6 +103,46 @@ enum TokenType: string
     case TNever = 'never';
     case TType = 'type';
     case TError = 'error';
+
+    // lexer directives
+    case LDEnd = '$end';
+    case LDRun = '$run';
+    case LDPass = '$pass';
+    case LDGet = '$get';
+
+    // lexer directive results
+    /**
+     * raw c code that is defined between $run and $end
+     */
+    case LDRunCode = '$RAW_C_CODE';
+    /**
+     * the WesProL variable (left) of `foo as a`
+     */
+    case LDPassSource = '$PASS_SOURCE';
+    /**
+     * the C variable name (right) of `bar as b`
+     */
+    case LDPassDestination = '$PASS_DESTINATION';
+    /**
+     * the source C variable (left) of `result as float`
+     */
+    case LDGetVariable = '$GET_VARIABLE';
+    /**
+     * the target type (right) of `result as float`
+     */
+    case LDGetType = '$GET_TYPE';
+
+    const array TYPES = [
+        self::TBool,
+        self::TInt,
+        self::TFloat,
+        self::TChar,
+        self::TString,
+        self::TArray,
+        self::TVoid,
+        self::TNever,
+        self::TType,
+    ];
 
     public static function lookupIdentifier(string $identifier): self
     {
