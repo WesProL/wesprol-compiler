@@ -1,6 +1,6 @@
 # WesProL
 
-For a lack of a better name.
+A **highly inefficient** compiled general purpose language that is adequately comfortable to write.
 
 > The book [Writing An Interpreter In Go](https://interpreterbook.com/) got me started. Highly recommend it!
 
@@ -105,7 +105,7 @@ Maybe some day, in a few years. Until then this is just for my personal learning
 - methods with irrecoverable permanent loops **SHOULD** return `never` to signify no other code will ever run after it
   - those methods are required to catch all runtime errors inside the loop
 
-> It is basically the PHP never type with strict compile time enforcement rather than runtime checks.
+> It is basically the PHP never type.
 
 > /!\ **This will be used but not enforced during the initial phase of this compiler.**
 > 
@@ -113,9 +113,10 @@ Maybe some day, in a few years. Until then this is just for my personal learning
 
 ### Stack And Heap
 
-`int`, `float`, `bool`, `char`, `type`: will **always** be on the stack.
+`int`, `float`, `bool`, `char`, `type`: **always** live on the stack.
 
-`string`, `array`, `error`, Object: will **always** be on the heap and need to be manually `delete`d.
+`string`, `array`, `error`, Object: **always** live on the heap
+and need to be manually freed with the `delete` keyword.
 
 Simple rules, no boxing and unboxing, no nothing.
 
@@ -180,13 +181,13 @@ class Program {
             Format::println(
                 // if is an expression! not a statement
                 if i % 15 {
-                    "FizzBuzz";
+                    give "FizzBuzz";
                 } elseif i % 3) {
-                    "Fizz";
+                    give "Fizz";
                 } elseif i % 5 {
-                    "Buzz";
+                    give "Buzz";
                 } else {
-                    i.toString();
+                    give i.toString();
                 },
             );
         }
@@ -644,3 +645,92 @@ class Program {
 ```
 
 [//]: # (TODO: named arguments)
+
+## Simulated compilation results (Pseudo-C)
+
+The resulting Pseudo-C-Code would in reality look quite different.
+
+I wrote this here to get a grasp on implementation details.
+WesProL strings themselves are quite differently constructed and will
+for simplicity just be written as classic literals.
+
+### if expressions
+
+[//]: # (TODO)
+
+### match value expressions
+
+> `match` expressions may mix between code and value syntax.
+> The resulting C code will always use a code syntax equivalent for value branches.
+
+> Missing `default` branch will result in a NULL-Value on runtime
+> and may cause unexpected behaviour or crashes.
+> Always complete your matches or ensure matched value may only result
+> in these cases.  
+
+```php
+let test int|string|null = match val {
+    "test" => 1,
+    "foo", "bar", "foobar" => 2,
+    "thingy" => "stringy",
+    default => null,
+};
+```
+
+The following result is not optimized at all, it doesn't use any proper lookup. That is fine for now.
+
+```php
+struct T_Value test = (
+    (strcmp(val, "test"))
+    ? (T_Value){TYPE_INT, _val_int(1)} // gives a "value union" with the int value set
+    : (
+       (strcmp(val, "foo") || strcmp(val, "bar") || strcmp(val, "foobar"))
+       ? (T_Value){TYPE_INT, _val_int(2)}
+       : (
+          (strcmp(val, "thingy"))
+          ? (T_Value){TYPE_STRING, _val_string("stringy")}
+          : (T_Value){TYPE_NULL, _val_null()}
+       )
+    )
+)
+```
+
+### match code expression
+
+> `default` may be safely omitted.
+
+> Omitting `give` results in `null` being the given value of the branch;
+
+```php
+let result int = match val {
+    0 => {
+        give A::do(val);
+    },
+    1, 2 => {
+        give B::do(1);
+    },
+    3, 4, 5 => {
+        C::do(val);
+        give D::do();
+    },
+};
+```
+
+```php
+T_Value _match_result;
+if (intcmp(val, 0)) {
+    _match_result = __class_A_function_do(val);
+} else if (intcmp(val, 1) || intcmp(val, 2)) {
+    _match_result = __class_B_function_do(_val_int(1));
+} else if (intcmp(val, 3) || intcmp(val, 4) || intcmp(val, 5)) {
+    __class_C_function_do(1);
+    _match_result = __class_D_function_do(_val_int(1));
+} else {
+    _match_result = (T_Value){TYPE_NULL, _val_null()};
+}
+T_Value result = _match_result;
+```
+
+### match mixed expression
+
+[//]: # (TODO)

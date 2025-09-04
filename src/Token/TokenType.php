@@ -91,6 +91,7 @@ enum TokenType: string
     case Catch = 'catch';
     case InstanceOf = 'instanceof';
     case Defer = 'defer';
+    case Give = 'give';
 
     // type-keywords
     case TBool = 'bool';
@@ -182,6 +183,7 @@ enum TokenType: string
             'catch' => self::Catch,
             'instanceof' => self::InstanceOf,
             'defer' => self::Defer,
+            'give' => self::Give,
             'bool' => self::TBool,
             'int' => self::TInt,
             'float' => self::TFloat,
