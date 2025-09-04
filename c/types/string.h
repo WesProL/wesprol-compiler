@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#ifndef _TYPES_STRING_H
+#define _TYPES_STRING_H
+
 #define T_CHAR_RAW_LENGTH 4
 
 struct T_CharRaw {
@@ -23,7 +26,7 @@ struct T_StringLiteral {
     long length;
 };
 
-struct T_StringLiteral _T_StringLiteral_new(struct T_CharRaw *characters, long length) {
+struct T_StringLiteral T_StringLiteral_new(struct T_CharRaw *characters, long length) {
     struct T_StringSegment *first;
     void *current = (void *)0;
     for (long i = 0; i < length; i++) {
@@ -49,7 +52,7 @@ struct T_StringLiteral _T_StringLiteral_new(struct T_CharRaw *characters, long l
     return string;
 }
 
-void _T_StringLiteral_delete(struct T_StringLiteral literal) {
+void T_StringLiteral_delete(struct T_StringLiteral literal) {
     struct T_StringSegment *next = literal.begin;
     for (long i = 1; i < literal.length; i++) {
         struct T_StringSegment *n = next->next;
@@ -60,7 +63,7 @@ void _T_StringLiteral_delete(struct T_StringLiteral literal) {
     free(next);
 }
 
-struct T_StringLiteral _T_StringLiteral_copy(struct T_StringLiteral src) {
+struct T_StringLiteral T_StringLiteral_copy(struct T_StringLiteral src) {
     struct T_StringSegment *first;
     void *current = (void *)0;
     struct T_StringSegment *srcCurrent = src.begin;
@@ -89,7 +92,7 @@ struct T_StringLiteral _T_StringLiteral_copy(struct T_StringLiteral src) {
     return string;
 }
 
-char *_T_StringLiteral_toCString(struct T_StringLiteral literal) {
+char *T_StringLiteral_toCString(struct T_StringLiteral literal) {
     char *string = malloc(literal.length * T_CHAR_RAW_LENGTH);
     char *s = string;
 
@@ -106,3 +109,5 @@ char *_T_StringLiteral_toCString(struct T_StringLiteral literal) {
 
     return string;
 }
+
+#endif

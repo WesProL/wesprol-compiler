@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "c/strings.h"
+#include "c/include.h"
 
 /*
 public static function main() void {
@@ -19,12 +19,12 @@ int main() {
         {{' ', 0, 0, 0}, 1},
         {{0xF0, 0x9F, 0x98, 0x80}, 4},
     };
-    struct T_StringLiteral _string_literal_87243723 = _T_StringLiteral_new(_string_literal_87243723_characters, _string_literal_87243723_length);
-    struct T_StringLiteral _foo_84630692 = _T_StringLiteral_copy(_string_literal_87243723);
+    struct T_StringLiteral _string_literal_87243723 = T_StringLiteral_new(_string_literal_87243723_characters, _string_literal_87243723_length);
+    struct T_Value _foo_84630692 = T_Value_from_string(T_StringLiteral_copy(_string_literal_87243723));
 
     // [DEMO]
     // Format::println() would in reality look quite different, this is just a quick example
-    char *printMe = _T_StringLiteral_toCString(_foo_84630692);
+    char *printMe = T_StringLiteral_toCString(_foo_84630692.valueWrapper.vString);
     printf("%s\n", printMe);
     free(printMe);
     // [/DEMO]
@@ -32,7 +32,7 @@ int main() {
     // foo technically leaks memory here, but the literal that foo uses is cleaned up automatically
     // foo could be freed manually, but i deliberately didnt show it here
 
-    _T_StringLiteral_delete(_string_literal_87243723);
+    T_StringLiteral_delete(_string_literal_87243723);
 
     return 0;
 }
