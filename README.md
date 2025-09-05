@@ -1,6 +1,21 @@
-# WesProL
+<div align="center">
+<h1>WesProL</h1>
+<img src="./readme/wes_logo.png" height="80">
+<div>
 
-A **highly inefficient** compiled general purpose language that is adequately comfortable to write.
+![](https://img.shields.io/badge/coverage-0%25-red)
+![](https://img.shields.io/github/commit-activity/m/WesProL/wesprol-compiler)
+![](https://img.shields.io/github/v/release/WesProL/wesprol-compiler)
+[![License: MIT](https://img.shields.io/github/license/WesProL/wesprol-compiler)](../../raw/main/LICENSE.txt)
+![](https://img.shields.io/badge/created_for-the_heck_of_it-%23c4009a)
+
+</div>
+</div>
+
+A **highly inefficient**, very **experimental**, and **absolutely explicit** compiled
+general purpose language that is adequately comfortable to write.
+
+It features manual memory management and inherently UTF-8 safe strings.
 
 > The book [Writing An Interpreter In Go](https://interpreterbook.com/) got me started. Highly recommend it!
 
@@ -19,6 +34,9 @@ It also will feature interoperability with C (mostly for reliance on established
 ## How do I run this?
 
 You don't. Not yet.
+
+You can run the [hand compiled examples](./c_manually_compiled_examples) to see that the resulting C works.
+So far no process exists to automatically generate C from WesProL source.
 
 ## Why create another pointless imperative/object-oriented language?
 
@@ -119,6 +137,22 @@ Maybe some day, in a few years. Until then this is just for my personal learning
 and need to be manually freed with the `delete` keyword.
 
 Simple rules, no boxing and unboxing, no nothing.
+
+### ByRef and ByVal
+
+All types are passed by value by default.
+
+Strings will be automatically cloned before being
+passed to a new variable or a function.
+Similarly, arrays will be cloned.
+Objects are expensively cloned recursively on every pass.
+
+To improve performance, explicit passing by reference should be used where adequate.
+
+References need to be explicitly dereferenced.
+
+References themselves do not need to be freed as they live on the stack.
+Only the non-scalar value inside the reference needs manual cleanup.
 
 ## Examples
 
@@ -644,7 +678,68 @@ class Program {
 }
 ```
 
+### References
+
+> IMPORTANT: The WesProL dereference operator `*` has higher binding power than C.
+> 
+> It always dereferences the variable next to it.
+> 
+> `*foo.*bar` is equivalent to C `*((*foo).bar)`!
+> 
+> Similarly, the reference operator `&` differs from C in terms of syntax.
+> 
+> `user.&name` is the syntax to access a property reference.
+> It is equivalent to C `&(user.name)`.
+
+```php
+public static function main() void {
+    let foo int = 100;
+    let bar int = foo;
+    let fooref &int = &foo;
+
+    bar += 1;
+    *fooref += 2;
+
+    Format::print("Foo: {}\nBar: {}\nFooRef: {}\n".format(foo, bar, *fooref));
+}
+```
+
+```shell
+Foo: 102
+Bar: 101
+FooRef: 102
+```
+
+This example shows a `&User` having a `&Group` that also has `array<&User>`.
+
+```php
+public static function main() void {
+    let user &User = UserRepository::findUserById(123);
+    let admin &User|null = null;
+
+    // equivalent to C user->group->users
+    // or C *(*(*user).group).users
+    for userInGroup in *user.*group.*users {
+        if *userInGroup.administrator == true {
+            admin = userInGroup;
+            break;
+        }
+    }
+    
+    if admin == null {
+        Format::println("No administrator found!");
+    
+        return;
+    }
+    
+    Format::println("Administrator: {}".format(*admin.name));
+}
+```
+
 [//]: # (TODO: named arguments)
+[//]: # (TODO: enums not as insane as PHP, just int based)
+[//]: # (TODO: null safe accessor ?.)
+[//]: # (TODO: null coalesce)
 
 ## Simulated compilation results (Pseudo-C)
 
@@ -679,6 +774,7 @@ let test int|string|null = match val {
 
 The following result is not optimized at all, it doesn't use any proper lookup. That is fine for now.
 
+[//]: # (TODO: maybe we just use one uniform _match_result syntax?)
 ```php
 struct T_Value test = (
     (strcmp(val, "test"))

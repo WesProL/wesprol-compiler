@@ -8,9 +8,23 @@
 #define T_CHAR_RAW_LENGTH 4
 
 struct T_CharRaw {
-    char bytes[T_CHAR_RAW_LENGTH];
-    char length;
+    unsigned char bytes[T_CHAR_RAW_LENGTH];
+    unsigned char length;
 };
+
+bool T_CharRaw_equal(struct T_CharRaw a, struct T_CharRaw b) {
+    if (a.length != b.length) {
+        return false;
+    }
+
+    for (unsigned char i = 0; i < a.length; i++) {
+        if (a.bytes[0] != b.bytes[0]) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 struct T_CharLiteral {
     struct T_CharRaw character;
@@ -32,7 +46,7 @@ struct T_StringLiteral T_StringLiteral_new(struct T_CharRaw *characters, long le
     for (long i = 0; i < length; i++) {
         struct T_StringSegment *next = (struct T_StringSegment *)malloc(sizeof(struct T_StringSegment));
         next->character.length = characters[i].length;
-        for (char j = 0; j < characters[i].length; j++) {
+        for (unsigned char j = 0; j < characters[i].length; j++) {
             next->character.bytes[j] = characters[i].bytes[j];
         }
 

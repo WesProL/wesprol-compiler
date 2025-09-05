@@ -1,2 +1,6 @@
 #include "types.h"
+#include "types/string.h"
 #include "types/operators/int.h"
+#include "types/operators/float.h"
+#include "types/operators/char.h"
+#include "types/operators/string.h"
