@@ -2,6 +2,8 @@
 
 namespace RobertWesner\Wesprol\Token;
 
+// TODO: %=
+
 enum TokenType: string
 {
     case Illegal = 'illegal';

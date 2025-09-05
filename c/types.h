@@ -1,7 +1,8 @@
-#include "types/string.h"
-
 #ifndef _TYPES_H
 #define _TYPES_H
+
+#include "types/string.h"
+#include "types/null.h"
 
 enum Type {
     TYPE_BOOL,
@@ -26,7 +27,7 @@ union T_Any {
     // TODO: error
     // TODO: type
     // TODO: object
-    // TODO: null
+    struct T_Null vNull;
 };
 
 struct T_Value {
@@ -58,36 +59,9 @@ struct T_Value T_Value_from_string(struct T_StringLiteral val) {
 // TODO: error
 // TODO: type
 // TODO: object
-// TODO: null
 
-struct T_Value T_Value_clone(struct T_Value val) {
-    switch (val.type) {
-        case TYPE_BOOL:
-            return T_Value_from_bool(val.valueWrapper.vBool);
-        case TYPE_INT:
-            return T_Value_from_int(val.valueWrapper.vInt);
-        case TYPE_FLOAT:
-            return T_Value_from_float(val.valueWrapper.vFloat);
-        case TYPE_CHAR:
-            return T_Value_from_char(val.valueWrapper.vChar);
-        case TYPE_STRING:
-            return T_Value_from_string(val.valueWrapper.vString);
-        case TYPE_ARRAY:
-            // TODO
-            break;
-        case TYPE_ERROR:
-            // TODO
-            break;
-        case TYPE_TYPE:
-            // TODO
-            break;
-        case TYPE_OBJECT:
-            // TODO
-            break;
-        case TYPE_NULL:
-            // TODO
-            break;
-    }
+struct T_Value T_Value_from_null() {
+    return (struct T_Value){TYPE_NULL, (union T_Any){vNull: T_Null_new()}};
 }
 
 union T_Reference {

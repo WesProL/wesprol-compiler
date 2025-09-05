@@ -9,12 +9,12 @@ struct T_Value string_operator_infix_plus(struct T_Value a, struct T_Value b) {
     struct T_StringLiteral src1 = a.valueWrapper.vString;
     struct T_StringLiteral src2 = b.valueWrapper.vString;
     
-    long length = src1.length + src2.length;
+    unsigned long length = src1.length + src2.length;
 
     struct T_StringSegment *first;
     void *current = (void *)0;
     struct T_StringSegment *srcCurrent = src1.begin;
-    for (long i = 0; i < src1.length; i++) {
+    for (unsigned long i = 0; i < src1.length; i++) {
         struct T_StringSegment *next = (struct T_StringSegment *)malloc(sizeof(struct T_StringSegment));
         next->character.length = srcCurrent->character.length;
 
@@ -33,7 +33,7 @@ struct T_Value string_operator_infix_plus(struct T_Value a, struct T_Value b) {
     }
 
     srcCurrent = src2.begin;
-    for (long i = 0; i < src2.length; i++) {
+    for (unsigned long i = 0; i < src2.length; i++) {
         struct T_StringSegment *next = (struct T_StringSegment *)malloc(sizeof(struct T_StringSegment));
         next->character.length = srcCurrent->character.length;
 
@@ -65,7 +65,7 @@ struct T_Value string_operator_infix_equals_double(struct T_Value a, struct T_Va
 
     struct T_StringSegment *aNext = a.valueWrapper.vString.begin; 
     struct T_StringSegment *bNext = b.valueWrapper.vString.begin; 
-    for (long i = 1; i < a.valueWrapper.vString.length; i++) {
+    for (unsigned long i = 1; i < a.valueWrapper.vString.length; i++) {
         if (!T_CharRaw_equal(aNext->character, bNext->character)) {
             return T_Value_from_bool(false);
         }

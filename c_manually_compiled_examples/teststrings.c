@@ -10,7 +10,7 @@ public static function main() void {
 */
 
 int main() {
-    long _string_literal_87243723_length = 7;
+    unsigned long _string_literal_87243723_length = 7;
     struct T_CharRaw _string_literal_87243723_characters[] = {
         {{'H', 0, 0, 0}, 1},
         {{'e', 0, 0, 0}, 1},
@@ -24,7 +24,7 @@ int main() {
     struct T_Value _foo_84630692 = T_Value_from_string(T_StringLiteral_copy(_string_literal_87243723));
     T_StringLiteral_delete(_string_literal_87243723);
 
-    long _string_literal_72848123_length = 7;
+    unsigned long _string_literal_72848123_length = 7;
     struct T_CharRaw _string_literal_72848123_characters[] = {
         {{' ', 0, 0, 0}, 1},
         {{'W', 0, 0, 0}, 1},

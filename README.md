@@ -437,6 +437,32 @@ class Foo {
 }
 ```
 
+### Array usage
+
+```php
+public static function main() void {
+    let foo array[int] = array(10); // bucket-capacity¹
+    foo["a"] = 1300;
+    foo[0] = 37;
+
+    // append
+    foo[] = 123;
+
+    Format::println(
+        "{} {} {} {}".format(
+            foo["a"] + foo[0],
+            foo[1],
+            foo.capacity,
+            foo.length,
+        ),
+    );
+}
+```
+
+¹ Increased bucket capacity may significantly increase performance
+at the cost of slight memory usage overhead as the collision avoidance
+implementation uses linked lists on collision which is slower than direct access.
+
 ### We don't want classic inheritance!
 
 There is no `extends` keyword.

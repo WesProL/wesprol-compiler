@@ -22,7 +22,7 @@ public static function main() void {
 */
 
 int main() {
-    long _string_literal_93752018_length = 4;
+    unsigned long _string_literal_93752018_length = 4;
     struct T_CharRaw _string_literal_93752018_characters[] = {
         {{'A', 0, 0, 0}, 1},
         {{'a', 0, 0, 0}, 1},
@@ -33,7 +33,7 @@ int main() {
     struct T_Value _val1_74392910 = T_Value_from_string(T_StringLiteral_copy(_string_literal_93752018));
     T_StringLiteral_delete(_string_literal_93752018);
 
-    long _string_literal_38362031_length = 4;
+    unsigned long _string_literal_38362031_length = 4;
     struct T_CharRaw _string_literal_38362031_characters[] = {
         {{'A', 0, 0, 0}, 1},
         {{'a', 0, 0, 0}, 1},
@@ -44,7 +44,7 @@ int main() {
     struct T_Value _val2_58973241 = T_Value_from_string(T_StringLiteral_copy(_string_literal_38362031));
     T_StringLiteral_delete(_string_literal_38362031);
 
-    long _string_literal_02539112_length = 4;
+    unsigned long _string_literal_02539112_length = 4;
     struct T_CharRaw _string_literal_02539112_characters[] = {
         {{'A', 0, 0, 0}, 1},
         {{'a', 0, 0, 0}, 1},
