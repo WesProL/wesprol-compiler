@@ -6,7 +6,9 @@ use RobertWesner\Wesprol\Ast\Expression\Identifier;
 use RobertWesner\Wesprol\Ast\Expression\Type;
 use RobertWesner\Wesprol\Ast\ExpressionInterface;
 use RobertWesner\Wesprol\Ast\Program;
+use RobertWesner\Wesprol\Ast\Statement\GiveStatement;
 use RobertWesner\Wesprol\Ast\Statement\LetStatement;
+use RobertWesner\Wesprol\Ast\Statement\ReturnStatement;
 use RobertWesner\Wesprol\Ast\StatementInterface;
 use RobertWesner\Wesprol\Lexer\Lexer;
 use RobertWesner\Wesprol\Token\Token;
@@ -17,7 +19,7 @@ class Parser
     private Token $tokenCurrent;
     private Token $tokenPeek;
     /** @var ParserError[] */
-    private array $errors;
+    private array $errors = [];
 
     public function __construct(
         private readonly Lexer $lexer,
@@ -110,6 +112,10 @@ class Parser
         switch ($this->tokenCurrent->type) {
             case TokenType::Let:
                 return $this->parseLetStatement();
+            case TokenType::Return:
+                return $this->parseReturnStatement();
+            case TokenType::Give:
+                return $this->parseGiveStatement();
             default:
                 return null;
         }
@@ -137,6 +143,26 @@ class Parser
         $value = $this->parseExpression();
 
         return new LetStatement($letToken, $name, $type, $value);
+    }
+
+    private function parseReturnStatement(): ?ReturnStatement
+    {
+        $returnToken = $this->tokenCurrent;
+        $this->nextToken();
+
+        $value = $this->parseExpression();
+
+        return new ReturnStatement($returnToken, $value);
+    }
+
+    private function parseGiveStatement(): ?GiveStatement
+    {
+        $giveToken = $this->tokenCurrent;
+        $this->nextToken();
+
+        $value = $this->parseExpression();
+
+        return new GiveStatement($giveToken, $value);
     }
 
     private function parseExpression(): ?ExpressionInterface
