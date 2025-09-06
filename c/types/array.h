@@ -71,11 +71,11 @@ void T_Array_delete(struct T_Array arr) {
     // TODO: delete from heap
 }
 
-struct T_Value T_Array_find(struct T_Array arr, struct T_Value key) {
+struct T_Value *T_Array_find(struct T_Array arr, struct T_Value key) {
     struct T_ArrayInternal a = arr.internal;
 
     if (a.entries == 0) {
-        return T_Value_from_null();
+        return 0;
     }
 
     unsigned int k;
@@ -93,23 +93,31 @@ struct T_Value T_Array_find(struct T_Array arr, struct T_Value key) {
             k = (unsigned int)key.valueWrapper.vFloat;
             break;
         default:
-            return T_Value_from_null();
+            return 0;
     }
 
     k %= a.capacity;
     struct T_ArrayBucketEntry *current = a.entries + k;
     while (true) {
         if (current->key.type != TYPE_NULL && T_Value_equal(current->key, key)) {
-            return T_Value_clone(current->value);
+            return &current->value;
         }
 
         if (current->next == 0) {
-            return T_Value_from_null();
+            return 0;
         }
 
         current = current->next;
     }
+}
 
+struct T_Value T_Array_get(struct T_Array arr, struct T_Value key) {
+    struct T_Value *result = T_Array_find(arr, key);
+    if (result == 0) {
+        return T_Value_from_null();
+    }
+
+    return *result;
 }
 
 void T_Array_set(struct T_Array arr, struct T_Value key, struct T_Value value) {
@@ -124,7 +132,9 @@ void T_Array_set(struct T_Array arr, struct T_Value key, struct T_Value value) {
             k = (unsigned int)key.valueWrapper.vBool;
             break;
         case TYPE_INT:
-            // TODO: IF INT TYPE, MAKE SURE TO INCREASE nextIntKey
+            if (key.valueWrapper.vInt > 0 && key.valueWrapper.vInt >= arr.internal.nextIntKey) {
+                arr.internal.nextIntKey = key.valueWrapper.vInt;
+            }
             k = (unsigned int)key.valueWrapper.vInt;
             break;
         case TYPE_FLOAT:

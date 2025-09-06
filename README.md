@@ -86,9 +86,10 @@ Maybe some day, in a few years. Until then this is just for my personal learning
 
 ## Data types
 
+- `bool` is a C `bool`
+- `byte` is a C `unsigned char`
 - `int` is a C `long`
 - `float` is a C `double`
-- `bool` is a C `bool`
 - `char` is a custom UTF-8 character (5 bytes, yep)
 - `string` is a custom string of (not C) `char`
 - `array` is essentially a map with array capabilities, just like PHP's `array`
@@ -133,6 +134,8 @@ Maybe some day, in a few years. Until then this is just for my personal learning
 
 `int`, `float`, `bool`, `char`, `type`: **always** live on the stack.
 
+`byte` also lives on the stack, you should only handle bytes with streams!
+
 `string`, `array`, `error`, Object: **always** live on the heap
 and need to be manually freed with the `delete` keyword.
 
@@ -144,7 +147,7 @@ All types are passed by value by default.
 
 Strings will be automatically cloned before being
 passed to a new variable or a function.
-Similarly, arrays will be cloned.
+Similarly, arrays will be recursively cloned.
 Objects are expensively cloned recursively on every pass.
 
 To improve performance, explicit passing by reference should be used where adequate.
@@ -357,8 +360,15 @@ class Program {
 ```php
 namespace \App;
 
-class Foo(a int, b int = 2) : Stringable {
+class Foo : Stringable {
+    private a int;
+    private b int;
     public c int = 3;
+    
+    public Foo(a int, b int = 2) {
+        this.a = a;
+        this.b = b;
+    }
 
     public function toString() string {
         return "A: {}\nB: {}\nC: {}".format(this.a, this.b, this.c);
@@ -385,13 +395,12 @@ use \Standard\Types;
 
 class Dumper {
     public static function dump(
-        // equivalent to int|float|string|Stringable|null as all scalars implement Stringable
-        data Stringable|null,
+        data int|float|string|Stringable|null,
     ) string {
         Format::println(self::getValue(data));
     }
     
-    private static function getValue(data Stringable|null) string {
+    private static function getValue(data int|float|string|Stringable|null) string {
         if data == null {
             return "NULL";
         }
@@ -412,6 +421,36 @@ Dumper::printDump(1);       // int(1)
 Dumper::printDump(13.37);   // float(13.37)
 Dumper::printDump("Hello"); // string(Hello)
 Dumper::printDump(null);    // NULL
+```
+
+### Union static checking
+
+The compiler will enforce strict typing.
+A value of `string|int|null` cannot be passed to a method expecting `int`
+without previous assertions about the type as that would cause
+undefined behaviour.
+
+[//]: # (TODO: implement this once bootstrapping is done, until then we will ride this train unsafely)
+
+```php
+let value string|int|null = ValueGenerator::something();
+
+// THIS WILL NOT COMPILE:
+// value = MyCustomMathClass::add(value, 123);
+
+if value === null {
+    return;
+}
+
+// compiler now knows value may only be string|int
+
+if value instanceof string {
+    return;
+}
+
+// compiler now knows value may only be int
+
+value = MyCustomMathClass::add(value, 123);
 ```
 
 ### Array Types (includes Maps, just like PHP but with _more_ syntax)
@@ -447,6 +486,19 @@ public static function main() void {
 
     // append
     foo[] = 123;
+    
+    let bar array[string] = [
+        "123",
+        "456",
+        "789",
+    ];
+    
+    // this lets you modify a value via variable
+    // but more importantly this prevents copying
+    // which can be very important for large values like objects!
+    let bar1Ref = bar&[1];
+    *bar1Ref = "000";
+    // bar now is ["123", "000", "789"]
 
     Format::println(
         "{} {} {} {}".format(
@@ -460,7 +512,7 @@ public static function main() void {
 ```
 
 ¹ Increased bucket capacity may significantly increase performance
-at the cost of slight memory usage overhead as the collision avoidance
+at the cost of slight memory usage overhead as the collision handling
 implementation uses linked lists on collision which is slower than direct access.
 
 ### We don't want classic inheritance!

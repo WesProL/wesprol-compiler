@@ -15,10 +15,12 @@ bool T_Value_equal(struct T_Value a, struct T_Value b) {
     }
 
     switch (a.type) {
-        case TYPE_CHAR:
-            return char_operator_infix_equals_double(a, b).valueWrapper.vBool;
         case TYPE_BOOL:
             return a.valueWrapper.vBool == b.valueWrapper.vBool;
+        case TYPE_BYTE:
+            return a.valueWrapper.vByte == b.valueWrapper.vByte;
+        case TYPE_CHAR:
+            return char_operator_infix_equals_double(a, b).valueWrapper.vBool;
         case TYPE_INT:
             return a.valueWrapper.vInt == b.valueWrapper.vInt;
         case TYPE_FLOAT:
@@ -46,6 +48,8 @@ struct T_Value T_Value_clone(struct T_Value val) {
     switch (val.type) {
         case TYPE_BOOL:
             return T_Value_from_bool(val.valueWrapper.vBool);
+        case TYPE_BYTE:
+            return T_Value_from_byte(val.valueWrapper.vByte);
         case TYPE_INT:
             return T_Value_from_int(val.valueWrapper.vInt);
         case TYPE_FLOAT:

@@ -110,14 +110,22 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '%':
-                $token = $this->createToken(TokenType::Percent, '%');
+                if ($this->peekCharacter() === '&') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::PercentEquals, '%=');
+                } else {
+                    $token = $this->createToken(TokenType::Percent, '%');
+                }
                 $this->readCharacter();
                 break;
             case '&':
                 if ($this->peekCharacter() === '&') {
                     $this->readCharacter();
                     $token = $this->createToken(TokenType::AmpersandDouble, '&&');
-                } else {
+                } elseif ($this->peekCharacter() === '[') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::AmpersandSquareBracketLeft, '&[');
+                }else {
                     $token = $this->createToken(TokenType::Ampersand, '&');
                 }
                 $this->readCharacter();
@@ -148,6 +156,9 @@ class Lexer
                     } else {
                         $token = $this->createToken(TokenType::Range, '..');
                     }
+                } elseif($this->peekCharacter() === '{') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::DotBraceLeft, '.{');
                 } else {
                     $token = $this->createToken(TokenType::Dot, '.');
                 }

@@ -6,6 +6,7 @@
 
 enum Type {
     TYPE_BOOL,
+    TYPE_BYTE,
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_CHAR,
@@ -19,6 +20,7 @@ enum Type {
 
 union T_Any {
     bool vBool;
+    unsigned char vByte;
     long vInt;
     double vFloat;
     struct T_CharLiteral vChar;
@@ -37,6 +39,10 @@ struct T_Value {
 
 struct T_Value T_Value_from_bool(bool val) {
     return (struct T_Value){TYPE_BOOL, (union T_Any){vBool: val}};
+}
+
+struct T_Value T_Value_from_byte(unsigned char val) {
+    return (struct T_Value){TYPE_BYTE, (union T_Any){vByte: val}};
 }
 
 struct T_Value T_Value_from_int(long val) {

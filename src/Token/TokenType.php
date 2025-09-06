@@ -2,8 +2,6 @@
 
 namespace RobertWesner\Wesprol\Token;
 
-// TODO: %=
-
 enum TokenType: string
 {
     case Illegal = 'illegal';
@@ -25,6 +23,7 @@ enum TokenType: string
     case PlusEquals = '+=';
     case MinusEquals = '-=';
     case AsteriskEquals = '*=';
+    case PercentEquals = '%=';
     case SlashEquals = '/=';
     case Ampersand = '&';
     case Pipe = '|';
@@ -34,6 +33,7 @@ enum TokenType: string
     case GreaterThanDouble = '>>';
     case Backslash = '\\';
     case Dot = '.';
+    case DotBraceLeft = '.{';
     case Comma = ',';
     case Colon = ':';
     case ColonDouble = '::';
@@ -44,6 +44,7 @@ enum TokenType: string
     case BraceRight = '}';
     case SquareBracketLeft = '[';
     case SquareBracketRight = ']';
+    case AmpersandSquareBracketLeft = '&[';
     case LessThan = '<';
     case GreaterThan = '>';
     case LessThanEquals = '<=';
