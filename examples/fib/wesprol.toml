@@ -1,0 +1,7 @@
+[project]
+name="wesprol-examples/fib"
+type="project"
+
+[project.source]
+namspace="App"
+directory="src"

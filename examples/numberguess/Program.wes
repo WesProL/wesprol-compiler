@@ -1,0 +1,27 @@
+namespace \App;
+
+use \Standard\Format;
+use \Standard\Random;
+use \Standard\Compare;
+use \Standard\Ordering;
+
+class Program {
+    public static function main() void {
+        let number int = Random::range(1..100);
+        let guess int = 0;
+
+        do {
+            Format::print("Enter your guess: ");
+            guess = Format::readLine().trim().toInt();
+
+            // you can taste the Rust
+            match Compare::compare(guess, number) {
+                // Ordering is an enum
+                Ordering::Less => Format::println("Your guess is too small!"),
+                Ordering::Greater => Format::println("Your guess is too large!"),
+            };
+        } while guess != number;
+
+        Format::println("You guessed correctly, it was {}!".format(number));
+    }
+}

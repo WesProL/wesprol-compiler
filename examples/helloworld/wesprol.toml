@@ -1,0 +1,7 @@
+[project]
+name="wesprol-examples/helloworld"
+type="project"
+
+[project.source]
+namspace="App"
+directory="src"

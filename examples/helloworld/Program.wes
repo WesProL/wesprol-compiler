@@ -1,0 +1,10 @@
+namespace \App;
+
+use \Standard\Format;
+
+class Program {
+    public static function main() void {
+        // Format is a class, println is a static method
+        Format::println("Hello World!");
+    }
+}

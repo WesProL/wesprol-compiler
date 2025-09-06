@@ -159,80 +159,11 @@ Only the non-scalar value inside the reference needs manual cleanup.
 
 ## Examples
 
-> The provided examples may change at any point in time.
-> In fact, they already have changed several times.
-> Those are just ideas for now.
+> This is basically a soft specification of the language features.
 
-### Hello World!
+Full example projects are available in the [examples directory](./examples).
 
-```php
-namespace \App;
-
-use \Standard\Format;
-
-class Program {
-    public static function main() void {
-        // Format is a class, println is a static method
-        Format::println("Hello World!");
-    }
-}
-```
-
-### Fib
-
-```php
-namespace \App;
-
-use \Standard\Format;
-
-class Program {
-    // return fibonacci at the nth position
-    private static function fib(n int) int {
-        if n <= 1 {
-            return n;
-        }
-
-        return self::fib(n - 1) + self::fib(n - 2);
-    }
-
-    public static function main() void {
-        let fib47 int = self::fib(47);
-        Std::Format::println("{}".format(fib47)); // should print "2971215073""
-    }
-}
-```
-
-### FizzBuzz
-
-```php
-namespace \App;
-
-use \Standard\Format;
-
-class Program {
-    // Note, this leaks memory by design, strings are never cleaned up.
-    // That is fine for short-lived example processes though.
-    public static function main() void {
-        // Rust style ranges, need to be int, cannot use float
-        for i in 1..=100 {
-            Format::println(
-                // if is an expression! not a statement
-                if i % 15 {
-                    give "FizzBuzz";
-                } elseif i % 3) {
-                    give "Fizz";
-                } elseif i % 5 {
-                    give "Buzz";
-                } else {
-                    give i.toString();
-                },
-            );
-        }
-    }
-}
-```
-
-### All the loops
+### Loops
 
 ```php
 namespace \App;
@@ -258,38 +189,6 @@ class Program {
         do {
         
         } while condition == true;
-    }
-}
-```
-
-### Guess a number
-
-```php
-namespace \App;
-
-use \Standard\Format;
-use \Standard\Random;
-use \Standard\Compare;
-use \Standard\Ordering;
-
-class Program {
-    public static function main() void {
-        let number int = Random::range(1..100);
-        let guess int = 0;
-
-        do {
-            Format::print("Enter your guess: ");
-            guess = Format::readLine().trim().toInt();
-
-            // you can taste the Rust
-            match Compare::compare(guess, number) {
-                // Ordering is an enum
-                Ordering::Less => Format::println("Your guess is too small!"), 
-                Ordering::Greater => Format::println("Your guess is too large!"), 
-            };
-        } while guess != number;
-
-        Format::println("You guessed correctly, it was {}!".format(number));
     }
 }
 ```
@@ -885,6 +784,14 @@ let result int = match val {
 #### match mixed expression
 
 [//]: # (TODO)
+
+### Default parameter arguments
+
+```php
+public function demo(name string, role Role = Role::User) {
+    // ...
+}
+```
 
 ## Planned features is future releases
 

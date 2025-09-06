@@ -1,0 +1,25 @@
+namespace \App;
+
+use \Standard\Format;
+
+class Program {
+    // Note, this leaks memory by design, strings are never cleaned up.
+    // That is fine for short-lived example processes though.
+    public static function main() void {
+        // Rust style ranges, need to be int, cannot use float
+        for i in 1..=100 {
+            Format::println(
+                // if is an expression! not a statement
+                if i % 15 {
+                    give "FizzBuzz";
+                } elseif i % 3) {
+                    give "Fizz";
+                } elseif i % 5 {
+                    give "Buzz";
+                } else {
+                    give i.toString();
+                },
+            );
+        }
+    }
+}

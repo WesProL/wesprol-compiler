@@ -1,0 +1,19 @@
+namespace \App;
+
+use \Standard\Format;
+
+class Program {
+    // return fibonacci at the nth position
+    private static function fib(n int) int {
+        if n <= 1 {
+            return n;
+        }
+
+        return self::fib(n - 1) + self::fib(n - 2);
+    }
+
+    public static function main() void {
+        let fib47 int = self::fib(47);
+        Std::Format::println("{}".format(fib47)); // should print "2971215073""
+    }
+}
