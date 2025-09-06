@@ -8,7 +8,7 @@ enum TokenType: string
     case Eof = 'EOF';
     case Identifier = 'identifier';
     case Integer = 'integer';
-    case Decimal = 'decimal';
+    case FloatingPointNumber = 'floating_point_number';
     case CharacterLiteral = 'character_literal';
     case StringLiteral = 'string_literal';
     case NamespaceLiteral = 'namespace_literal';
@@ -52,7 +52,7 @@ enum TokenType: string
     case LessThanEquals = '<=';
     case GreaterThanEquals = '>=';
     case EqualsDouble = '==';
-    case NotEquals = '!=';
+    case ExclamationEquals = '!=';
     case Range = '..';
     case RangeInclusive = '..=';
     case EqualsGreaterThanArrow = '=>';

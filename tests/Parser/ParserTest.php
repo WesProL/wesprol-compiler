@@ -2,6 +2,9 @@
 
 namespace RobertWesner\Wesprol\Tests\Parser;
 
+use Generator;
+use mysql_xdevapi\Expression;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RobertWesner\Wesprol\Ast\Expression\Identifier;
 use RobertWesner\Wesprol\Ast\ExpressionInterface;
@@ -20,7 +23,7 @@ class ParserTest extends TestCase
         $input = <<<EOF
             let x int = 5;
             let y int = 10;
-            let foobar string = "test";
+            let foobar string = 838383;
             EOF;
 
         $parser = new Parser(new Lexer($input));
@@ -50,7 +53,7 @@ class ParserTest extends TestCase
     {
         $input = <<<EOF
             return 5;
-            return "test";
+            return 838383;
             return 1 + 2;
             EOF;
 
@@ -72,7 +75,7 @@ class ParserTest extends TestCase
     {
         $input = <<<EOF
             give 5;
-            give "test";
+            give 838383;
             give 1 + 2;
             EOF;
 
@@ -104,6 +107,30 @@ class ParserTest extends TestCase
         $expression = $actual->expression;
         self::assertInstanceOf(Identifier::class, $expression);
         self::assertSame("foobar", $expression->value);
+    }
+
+    public static function precedenceProvider(): Generator
+    {
+        yield ["((-a) * b)", "-a * b"];
+        yield ["(!(-a))", "!-a"];
+        yield ["((a + b) + c)", "a + b + c"];
+        yield ["((a + b) - c)", "a + b - c"];
+        yield ["((a * b) * c)", "a * b * c"];
+        yield ["((a * b) / c)", "a * b / c"];
+        yield ["(a + (b * c))", "a + b * c"];
+        yield ["(a + (b / c))", "a + b / c"];
+        yield ["(((a + (b * c)) + (d / e)) - f)", "a + b * c + d / e - f"];
+        yield ["((5 > 4) == (3 < 4))", "5 > 4 == 3 < 4"];
+    }
+
+    #[DataProvider('precedenceProvider')]
+    public function testPrecedence(string $expected, string $input): void
+    {
+        $parser = new Parser(new Lexer($input));
+        $program = $parser->parse();
+        self::assertNoParserErrors($parser);
+
+        self::assertSame($expected, (string)$program);
     }
 
     private static function assertNoParserErrors(Parser $parser): void

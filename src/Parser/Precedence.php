@@ -5,16 +5,18 @@ namespace RobertWesner\Wesprol\Parser;
 enum Precedence: int
 {
     case Lowest = 0;
-    case NullCoalesce = 1;
-    case EqualityCheck = 2;
-    case LessGreater = 3;
-    case PlusMinus = 4;
-    case Bitwise = 5;
-    case MultiplyDivideModulo = 6;
+    case LogicOrAnd = 1;
+    case NullCoalesce = 2;
+    case EqualityCheck = 3;
+    case LessGreater = 4;
+    case Range = 5;
+    case PlusMinus = 6;
+    case Bitwise = 7;
+    case MultiplyDivideModulo = 8;
     /**
      * . or :: or .{ or ?.
      */
-    case Accessor = 7;
-    case Prefix = 8;
-    case Call = 9;
+    case Accessor = 9;
+    case Prefix = 10;
+    case Call = 11;
 }

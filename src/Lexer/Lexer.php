@@ -52,7 +52,7 @@ class Lexer
                 break;
             case '!':
                 if ($this->peekCharacter() === '=') {
-                    $token = $this->createToken(TokenType::NotEquals, '!=');
+                    $token = $this->createToken(TokenType::ExclamationEquals, '!=');
                     $this->readCharacter();
                 } else {
                     $token = $this->createToken(TokenType::Exclamation, '!');
