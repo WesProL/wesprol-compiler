@@ -21,4 +21,16 @@ readonly class LetStatement implements StatementInterface
     {
         return $this->token->literal;
     }
+
+    public function __toString(): string
+    {
+        return $this->tokenLiteral()
+            . ' '
+            . $this->name
+            . ' '
+            . $this->type
+            . ' = '
+            . $this->value
+            . ';';
+    }
 }

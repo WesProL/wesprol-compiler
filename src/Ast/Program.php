@@ -15,4 +15,13 @@ class Program implements NodeInterface
 
         return "";
     }
+
+    public function __toString(): string
+    {
+        if (count($this->statements) > 0) {
+            return $this->statements[0];
+        }
+
+        return "";
+    }
 }

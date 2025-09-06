@@ -3,7 +3,9 @@
 namespace RobertWesner\Wesprol\Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
+use RobertWesner\Wesprol\Ast\Expression\Identifier;
 use RobertWesner\Wesprol\Ast\ExpressionInterface;
+use RobertWesner\Wesprol\Ast\Statement\ExpressionStatement;
 use RobertWesner\Wesprol\Ast\Statement\GiveStatement;
 use RobertWesner\Wesprol\Ast\Statement\LetStatement;
 use RobertWesner\Wesprol\Ast\Statement\ReturnStatement;
@@ -86,6 +88,22 @@ class ParserTest extends TestCase
             self::assertInstanceOf(ExpressionInterface::class, $actual->value);
             // TODO: check expression
         }
+    }
+
+    public function testIdentifierExpression(): void
+    {
+        $input = 'foobar;';
+
+        $parser = new Parser(new Lexer($input));
+        $program = $parser->parse();
+        self::assertNoParserErrors($parser);
+        self::assertCount(1, $program->statements);
+
+        $actual = $program->statements[0];
+        self::assertInstanceOf(ExpressionStatement::class, $actual);
+        $expression = $actual->expression;
+        self::assertInstanceOf(Identifier::class, $expression);
+        self::assertSame("foobar", $expression->value);
     }
 
     private static function assertNoParserErrors(Parser $parser): void

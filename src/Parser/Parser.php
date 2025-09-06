@@ -6,6 +6,7 @@ use RobertWesner\Wesprol\Ast\Expression\Identifier;
 use RobertWesner\Wesprol\Ast\Expression\Type;
 use RobertWesner\Wesprol\Ast\ExpressionInterface;
 use RobertWesner\Wesprol\Ast\Program;
+use RobertWesner\Wesprol\Ast\Statement\ExpressionStatement;
 use RobertWesner\Wesprol\Ast\Statement\GiveStatement;
 use RobertWesner\Wesprol\Ast\Statement\LetStatement;
 use RobertWesner\Wesprol\Ast\Statement\ReturnStatement;
@@ -21,12 +22,19 @@ class Parser
     /** @var ParserError[] */
     private array $errors = [];
 
+    private array $prefixParseFunctions = [];
+    private array $infixParseFunctions = [];
+
     public function __construct(
         private readonly Lexer $lexer,
     ) {
         // populate current and peek
         $this->nextToken();
         $this->nextToken();
+
+        $this->registerPrefix(TokenType::Identifier, function (): ExpressionInterface {
+            return new Identifier($this->tokenCurrent, $this->tokenCurrent->literal);
+        });
     }
 
     public function parse(): Program
@@ -50,6 +58,16 @@ class Parser
     public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    private function registerPrefix(TokenType $type, callable $function): void
+    {
+        $this->prefixParseFunctions[$type->value] = $function;
+    }
+
+    private function registerInfix(TokenType $type, callable $function): void
+    {
+        $this->infixParseFunctions[$type->value] = $function;
     }
 
     private function nextToken(): void
@@ -117,7 +135,7 @@ class Parser
             case TokenType::Give:
                 return $this->parseGiveStatement();
             default:
-                return null;
+                return $this->parseExpressionStatement();
         }
     }
 
@@ -140,7 +158,7 @@ class Parser
         }
         $this->nextToken();
 
-        $value = $this->parseExpression();
+        $value = $this->parseExpression(Precedence::Lowest);
 
         return new LetStatement($letToken, $name, $type, $value);
     }
@@ -150,7 +168,7 @@ class Parser
         $returnToken = $this->tokenCurrent;
         $this->nextToken();
 
-        $value = $this->parseExpression();
+        $value = $this->parseExpression(Precedence::Lowest);
 
         return new ReturnStatement($returnToken, $value);
     }
@@ -160,22 +178,43 @@ class Parser
         $giveToken = $this->tokenCurrent;
         $this->nextToken();
 
-        $value = $this->parseExpression();
+        $value = $this->parseExpression(Precedence::Lowest);
 
         return new GiveStatement($giveToken, $value);
     }
 
-    private function parseExpression(): ?ExpressionInterface
+    public function parseExpressionStatement(): ?ExpressionStatement
     {
-        while (!$this->currentIs(TokenType::Semicolon) && !$this->currentIs(TokenType::Eof)) {
+        $token = $this->tokenCurrent;
+        $expression = $this->parseExpression(Precedence::Lowest);
+
+        if ($this->peekIs(TokenType::Semicolon)) {
             $this->nextToken();
         }
 
-        return new class implements ExpressionInterface {
-            public function tokenLiteral(): string
-            {
-                return "NOT_IMPLEMENTED";
+        return new ExpressionStatement($token, $expression);
+    }
+
+    private function parseExpression(Precedence $precedence): ?ExpressionInterface
+    {
+        if (!isset($this->prefixParseFunctions[$this->tokenCurrent->type->value])) {
+            while (!$this->currentIs(TokenType::Semicolon) && !$this->currentIs(TokenType::Eof)) {
+                $this->nextToken();
             }
-        };
+
+            return new class implements ExpressionInterface {
+                public function tokenLiteral(): string
+                {
+                    return "NOT_IMPLEMENTED";
+                }
+
+                public function __toString(): string
+                {
+                    return "NOT_IMPLEMENTED";
+                }
+            };
+        }
+
+        return $this->prefixParseFunctions[$this->tokenCurrent->type->value]();
     }
 }

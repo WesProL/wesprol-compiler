@@ -16,4 +16,9 @@ readonly class Identifier implements ExpressionInterface
     {
         return $this->token->literal;
     }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
 }

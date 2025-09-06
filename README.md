@@ -796,4 +796,5 @@ public function demo(name string, role Role = Role::User) {
 ## Planned features is future releases
 
 - named arguments
+- static null safe accessor `?::`
 - ...
