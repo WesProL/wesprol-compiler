@@ -16,6 +16,8 @@ class Parser
 {
     private Token $tokenCurrent;
     private Token $tokenPeek;
+    /** @var ParserError[] */
+    private array $errors;
 
     public function __construct(
         private readonly Lexer $lexer,
@@ -38,6 +40,14 @@ class Parser
         }
 
         return $program;
+    }
+
+    /**
+     * @return ParserError[]
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 
     private function nextToken(): void
@@ -63,8 +73,22 @@ class Parser
     {
         if ($this->peekIs($type)) {
             $this->nextToken();
+
             return true;
         }
+
+        $this->errors[] = new ParserError(
+            $this->tokenPeek->line,
+            $this->tokenPeek->column,
+            sprintf(
+                'Invalid token of type "%s" and value "%s" on line %d column %d. Expected type "%s".',
+                $this->tokenPeek->type->value,
+                $this->tokenPeek->literal,
+                $this->tokenPeek->line,
+                $this->tokenPeek->column,
+                $type->value,
+            ),
+        );
 
         return false;
     }

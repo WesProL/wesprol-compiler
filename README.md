@@ -13,7 +13,7 @@
 </div>
 
 A **highly inefficient**, very **experimental**, and **absolutely explicit** compiled
-general purpose language that is adequately comfortable to write.
+general-purpose language that is adequately comfortable to write.
 
 It features manual memory management and inherently UTF-8 safe strings.
 

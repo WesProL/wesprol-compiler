@@ -20,6 +20,7 @@ class ParserTest extends TestCase
 
         $parser = new Parser(new Lexer($input));
         $program = $parser->parse();
+        self::assertNoParserErrors($parser);
         self::assertCount(3, $program->statements);
 
         $expected = [
@@ -33,6 +34,18 @@ class ParserTest extends TestCase
             self::assertInstanceOf(LetStatement::class, $actual);
             self::assertSame($name, $actual->name->value);
             self::assertSame($type, $actual->type->token->type);
+        }
+    }
+
+    private static function assertNoParserErrors(Parser $parser): void
+    {
+        if (count($parser->getErrors()) === 0) {
+            return;
+        }
+
+        foreach ($parser->getErrors() as $error) {
+            echo $error->message;
+            self::fail();
         }
     }
 }
