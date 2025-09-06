@@ -15,6 +15,8 @@ enum TokenType: string
     case Equals = '=';
     case Exclamation = '!';
     case Question = '?';
+    case QuestionDouble = '??';
+    case QuestionDot = '?.';
     case Plus = '+';
     case Minus = '-';
     case Asterisk = '*';
@@ -85,6 +87,7 @@ enum TokenType: string
     case ClassDef = 'class';
     case TraitDef = 'trait';
     // ErrorDef is TError, I moved it since you both need it to define and also to check
+    case EnumDef = 'enum';
     case New = 'new';
     case Delete = 'delete';
     case Use = 'use';
@@ -176,7 +179,7 @@ enum TokenType: string
             'static' => self::Static,
             'class' => self::ClassDef,
             'trait' => self::TraitDef,
-            'error' => self::TError,
+            'enum' => self::EnumDef,
             'new' => self::New,
             'delete' => self::Delete,
             'use' => self::Use,
@@ -195,6 +198,7 @@ enum TokenType: string
             'array' => self::TArray,
             'void' => self::TVoid,
             'never' => self::TNever,
+            'error' => self::TError,
             'type' => self::TType,
             default => self::Identifier,
         };

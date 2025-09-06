@@ -3,7 +3,7 @@
 <img src="./readme/wes_logo.png" height="80">
 <div>
 
-![](https://img.shields.io/badge/coverage-0%25-red)
+![](https://img.shields.io/badge/coverage---1%25-red)
 ![](https://img.shields.io/github/commit-activity/m/WesProL/wesprol-compiler)
 ![](https://img.shields.io/github/v/release/WesProL/wesprol-compiler)
 [![License: MIT](https://img.shields.io/github/license/WesProL/wesprol-compiler)](../../raw/main/LICENSE.txt)
@@ -814,32 +814,43 @@ public static function main() void {
 }
 ```
 
-[//]: # (TODO: named arguments)
-[//]: # (TODO: enums not as insane as PHP, just int based)
-[//]: # (TODO: null safe accessor ?.)
-[//]: # (TODO: null coalesce)
+### NULL-safety
 
-## Simulated compilation results (Pseudo-C)
+```php
+let foo string = Whatever::generateStringOrNull() ?? "default";
+let username string|null = UserRepository::findById(123)?.username;
+```
 
-The resulting Pseudo-C-Code would in reality look quite different.
+### Enumerations
 
-I wrote this here to get a grasp on implementation details.
-WesProL strings themselves are quite differently constructed and will
-for simplicity just be written as classic literals.
+> There are no backed enums like PHP, just `int`.
 
-### if expressions
+```enum
+enum TokenType {
+    Illegal,
+    Eof,
+    Identifier,
+    Integer,
+    Decimal,
+    // ...
+}
+```
 
-[//]: # (TODO)
+```php
+let tokenType TokenType = TokenType::Identifier;
+```
 
-### match value expressions
+### match expressions
+
+> Missing `default` branch will result in a NULL-Value on runtime
+> and may cause unexpected behaviour or crashes if the type does not accept `null`.
+>
+> Always complete your matches or ensure matched null value is accepted as `null`.
+
+#### match value expressions
 
 > `match` expressions may mix between code and value syntax.
 > The resulting C code will always use a code syntax equivalent for value branches.
-
-> Missing `default` branch will result in a NULL-Value on runtime
-> and may cause unexpected behaviour or crashes.
-> Always complete your matches or ensure matched value may only result
-> in these cases.  
 
 ```php
 let test int|string|null = match val {
@@ -852,28 +863,9 @@ let test int|string|null = match val {
 
 The following result is not optimized at all, it doesn't use any proper lookup. That is fine for now.
 
-[//]: # (TODO: maybe we just use one uniform _match_result syntax?)
-```php
-struct T_Value test = (
-    (strcmp(val, "test"))
-    ? (T_Value){TYPE_INT, _val_int(1)} // gives a "value union" with the int value set
-    : (
-       (strcmp(val, "foo") || strcmp(val, "bar") || strcmp(val, "foobar"))
-       ? (T_Value){TYPE_INT, _val_int(2)}
-       : (
-          (strcmp(val, "thingy"))
-          ? (T_Value){TYPE_STRING, _val_string("stringy")}
-          : (T_Value){TYPE_NULL, _val_null()}
-       )
-    )
-)
-```
+#### match code expression
 
-### match code expression
-
-> `default` may be safely omitted.
-
-> Omitting `give` results in `null` being the given value of the branch;
+> Omitting `give` results in `null` being the given value of the branch.
 
 ```php
 let result int = match val {
@@ -890,21 +882,11 @@ let result int = match val {
 };
 ```
 
-```php
-T_Value _match_result;
-if (intcmp(val, 0)) {
-    _match_result = __class_A_function_do(val);
-} else if (intcmp(val, 1) || intcmp(val, 2)) {
-    _match_result = __class_B_function_do(_val_int(1));
-} else if (intcmp(val, 3) || intcmp(val, 4) || intcmp(val, 5)) {
-    __class_C_function_do(1);
-    _match_result = __class_D_function_do(_val_int(1));
-} else {
-    _match_result = (T_Value){TYPE_NULL, _val_null()};
-}
-T_Value result = _match_result;
-```
-
-### match mixed expression
+#### match mixed expression
 
 [//]: # (TODO)
+
+## Planned features is future releases
+
+- named arguments
+- ...

@@ -60,7 +60,15 @@ class Lexer
                 $this->readCharacter();
                 break;
             case '?':
-                $token = $this->createToken(TokenType::Question, '?');
+                if ($this->peekCharacter() === '?') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::QuestionDouble, '??');
+                } elseif ($this->peekCharacter() === '.') {
+                    $this->readCharacter();
+                    $token = $this->createToken(TokenType::QuestionDot, '?.');
+                } else {
+                    $token = $this->createToken(TokenType::Question, '?');
+                }
                 $this->readCharacter();
                 break;
             case '+':
