@@ -13,7 +13,9 @@ class Lexer
     private int $readingPosition = 0;
     private string $character = '';
     private int $line = 1;
-    private int $column = 1;
+    // gets set to 1 in constructor by readCharacter
+    private int $column = 0;
+    private int $tokenColumn;
 
     /**
      * @var Token[]
@@ -35,6 +37,7 @@ class Lexer
 
         $this->eatWhitespaces();
 
+        $this->tokenColumn = $this->column;
         switch ($this->character) {
             case '':
                 return $this->createToken(TokenType::Eof, '');
@@ -273,7 +276,7 @@ class Lexer
                 if ($this->isDigit($this->character)) {
                     $number = $this->readNumber();
                     if (str_contains($number, '.')) {
-                        return $this->createToken(TokenType::TFloat, $number);
+                        return $this->createToken(TokenType::FloatingPointNumber, $number);
                     } else {
                         return $this->createToken(TokenType::Integer, $number);
                     }
@@ -316,7 +319,7 @@ class Lexer
 
     private function createToken(TokenType $type, string $literal): Token
     {
-        return new Token($type, $literal, $this->line, $this->column);
+        return new Token($type, $literal, $this->line, $this->tokenColumn);
     }
 
     private function eatWhitespaces(): void
