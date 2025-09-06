@@ -1,5 +1,5 @@
 <div align="center">
-<h1>WesProL</h1>
+<h1>The Wes Programming Language<br><small>-= WesProL =-</small></h1>
 <img src="./readme/wes_logo.png" height="80">
 <div>
 
