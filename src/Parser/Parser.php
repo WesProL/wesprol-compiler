@@ -2,6 +2,7 @@
 
 namespace RobertWesner\Wesprol\Parser;
 
+use RobertWesner\Wesprol\Ast\Expression\BoolLiteral;
 use RobertWesner\Wesprol\Ast\Expression\FloatLiteral;
 use RobertWesner\Wesprol\Ast\Expression\Identifier;
 use RobertWesner\Wesprol\Ast\Expression\InfixExpression;
@@ -76,6 +77,29 @@ class Parser
         $this->registerPrefix(TokenType::FloatingPointNumber, function (): ExpressionInterface {
             return new FloatLiteral($this->tokenCurrent, $this->tokenCurrent->literal);
         });
+        $this->registerPrefix(TokenType::ParenthesisLeft, function (): ?ExpressionInterface {
+            $this->nextToken();
+
+            $expression = $this->parseExpression(Precedence::Lowest);
+            if (!$this->expectPeek(TokenType::ParenthesisRight)) {
+                $this->errors[] = new ParserError(
+                    $this->tokenPeek->line,
+                    $this->tokenPeek->column,
+                    sprintf(
+                        'Expected "%s" on line %d column %d..',
+                        TokenType::ParenthesisRight->value,
+                        $this->tokenCurrent->line,
+                        $this->tokenCurrent->column,
+                    ),
+                );
+
+                return null;
+            }
+
+            return $expression;
+        });
+        $this->registerPrefix(TokenType::True, $this->parseBoolLiteral(...));
+        $this->registerPrefix(TokenType::False, $this->parseBoolLiteral(...));
         $this->registerPrefix(TokenType::Exclamation, $this->parsePrefixExpression(...));
         $this->registerPrefix(TokenType::Minus, $this->parsePrefixExpression(...));
         $this->registerPrefix(TokenType::Ampersand, $this->parsePrefixExpression(...));
@@ -245,6 +269,13 @@ class Parser
         $this->nextToken();
 
         $value = $this->parseExpression(Precedence::Lowest);
+        if ($value === null) {
+            return null;
+        }
+
+        if (!$this->expectPeek(TokenType::Semicolon)) {
+            return null;
+        }
 
         return new LetStatement($letToken, $name, $type, $value);
     }
@@ -255,6 +286,13 @@ class Parser
         $this->nextToken();
 
         $value = $this->parseExpression(Precedence::Lowest);
+        if ($value === null) {
+            return null;
+        }
+
+        if (!$this->expectPeek(TokenType::Semicolon)) {
+            return null;
+        }
 
         return new ReturnStatement($returnToken, $value);
     }
@@ -265,6 +303,13 @@ class Parser
         $this->nextToken();
 
         $value = $this->parseExpression(Precedence::Lowest);
+        if ($value === null) {
+            return null;
+        }
+
+        if (!$this->expectPeek(TokenType::Semicolon)) {
+            return null;
+        }
 
         return new GiveStatement($giveToken, $value);
     }
@@ -273,6 +318,9 @@ class Parser
     {
         $token = $this->tokenCurrent;
         $expression = $this->parseExpression(Precedence::Lowest);
+        if ($expression === null) {
+            return null;
+        }
 
         if ($this->peekIs(TokenType::Semicolon)) {
             $this->nextToken();
@@ -335,5 +383,10 @@ class Parser
         $right = $this->parseExpression($precedence);
 
         return new InfixExpression($token, $left, $token->type, $right);
+    }
+
+    private function parseBoolLiteral(): ExpressionInterface
+    {
+        return new BoolLiteral($this->tokenCurrent, $this->tokenCurrent->type);
     }
 }

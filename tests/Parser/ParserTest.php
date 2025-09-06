@@ -3,7 +3,6 @@
 namespace RobertWesner\Wesprol\Tests\Parser;
 
 use Generator;
-use mysql_xdevapi\Expression;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RobertWesner\Wesprol\Ast\Expression\Identifier;
@@ -23,7 +22,7 @@ class ParserTest extends TestCase
         $input = <<<EOF
             let x int = 5;
             let y int = 10;
-            let foobar string = 838383;
+            let foobar float = 838.383;
             EOF;
 
         $parser = new Parser(new Lexer($input));
@@ -34,7 +33,7 @@ class ParserTest extends TestCase
         $expected = [
             ["x", TokenType::TInt],
             ["y", TokenType::TInt],
-            ["foobar", TokenType::TString],
+            ["foobar", TokenType::TFloat],
         ];
 
         foreach ($expected as $i => [$name, $type]) {
@@ -121,6 +120,8 @@ class ParserTest extends TestCase
         yield ["(a + (b / c))", "a + b / c"];
         yield ["(((a + (b * c)) + (d / e)) - f)", "a + b * c + d / e - f"];
         yield ["((5 > 4) == (3 < 4))", "5 > 4 == 3 < 4"];
+        yield ["((1 + (2 + 3)) + 4)", "1 + (2 + 3) + 4"];
+        yield ["((5 + 5) * 2)", "(5 + 5) * 2"];
     }
 
     #[DataProvider('precedenceProvider')]
