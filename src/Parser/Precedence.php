@@ -13,10 +13,11 @@ enum Precedence: int
     case PlusMinus = 6;
     case Bitwise = 7;
     case MultiplyDivideModulo = 8;
+    case Prefix = 9;
     /**
      * . or :: or .{ or ?.
      */
-    case Accessor = 9;
-    case Prefix = 10;
-    case Call = 11;
+    case Accessor = 10;
+    case Reference = 11;
+    case Call = 12;
 }

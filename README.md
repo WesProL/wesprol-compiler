@@ -797,4 +797,5 @@ public function demo(name string, role Role = Role::User) {
 
 - named arguments
 - static null safe accessor `?::`
+- Attributes (available through reflection)
 - ...

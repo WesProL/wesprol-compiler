@@ -122,6 +122,7 @@ class ParserTest extends TestCase
         yield ["((5 > 4) == (3 < 4))", "5 > 4 == 3 < 4"];
         yield ["((1 + (2 + 3)) + 4)", "1 + (2 + 3) + 4"];
         yield ["((5 + 5) * 2)", "(5 + 5) * 2"];
+        yield ["(((*foo) . (*bar)) . (&name))", "*foo.*bar.&name"];
     }
 
     #[DataProvider('precedenceProvider')]

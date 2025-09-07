@@ -101,10 +101,10 @@ class Parser
         $this->registerPrefix(TokenType::True, $this->parseBoolLiteral(...));
         $this->registerPrefix(TokenType::False, $this->parseBoolLiteral(...));
         $this->registerPrefix(TokenType::Exclamation, $this->parsePrefixExpression(...));
-        $this->registerPrefix(TokenType::Minus, $this->parsePrefixExpression(...));
-        $this->registerPrefix(TokenType::Ampersand, $this->parsePrefixExpression(...));
-        $this->registerPrefix(TokenType::Asterisk, $this->parsePrefixExpression(...));
         $this->registerPrefix(TokenType::Tilde, $this->parsePrefixExpression(...));
+        $this->registerPrefix(TokenType::Minus, $this->parsePrefixExpression(...));
+        $this->registerPrefix(TokenType::Ampersand, $this->parseReferencePrefixExpression(...));
+        $this->registerPrefix(TokenType::Asterisk, $this->parseReferencePrefixExpression(...));
 
         $this->registerInfix(TokenType::EqualsDouble, $this->parseInfixExpression(...));
         $this->registerInfix(TokenType::ExclamationEquals, $this->parseInfixExpression(...));
@@ -370,6 +370,15 @@ class Parser
         $token = $this->tokenCurrent;
         $this->nextToken();
         $right = $this->parseExpression(Precedence::Prefix);
+
+        return new PrefixExpression($token, $token->type, $right);
+    }
+
+    private function parseReferencePrefixExpression(): ExpressionInterface
+    {
+        $token = $this->tokenCurrent;
+        $this->nextToken();
+        $right = $this->parseExpression(Precedence::Reference);
 
         return new PrefixExpression($token, $token->type, $right);
     }
