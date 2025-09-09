@@ -1,5 +1,5 @@
 [project]
-name="wesprol-examples/numberguess"
+name="wes-examples/fib"
 type="project"
 
 [project.source]

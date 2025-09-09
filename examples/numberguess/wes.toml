@@ -1,5 +1,5 @@
 [project]
-name="wesprol-examples/helloworld"
+name="wes-examples/numberguess"
 type="project"
 
 [project.source]

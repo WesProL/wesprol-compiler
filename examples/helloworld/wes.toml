@@ -1,5 +1,5 @@
 [project]
-name="wesprol-examples/fib"
+name="wes-examples/helloworld"
 type="project"
 
 [project.source]

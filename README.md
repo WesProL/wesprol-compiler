@@ -1,13 +1,13 @@
 <div align="center">
-<h1>The Wes Programming Language<br><small>-= WesProL =-</small></h1>
+<h1>The Wes Programming Language</h1>
 <img src="./readme/wes_logo.png" height="80">
 <div>
 
 ![](https://img.shields.io/badge/coverage---1%25-red)
-![](https://img.shields.io/github/commit-activity/m/WesProL/wesprol-compiler)
-![](https://img.shields.io/github/v/release/WesProL/wesprol-compiler)
-[![License: MIT](https://img.shields.io/github/license/WesProL/wesprol-compiler)](../../raw/main/LICENSE.txt)
-![](https://img.shields.io/badge/created_for-the_heck_of_it-%23c4009a)
+![](https://img.shields.io/github/commit-activity/m/wes-lang/wes-compiler)
+![](https://img.shields.io/github/v/release/wes-lang/wes-compiler)
+[![License: MIT](https://img.shields.io/github/license/wes-lang/wes-compiler)](../../raw/main/LICENSE.txt)
+![](https://img.shields.io/badge/cost_of_abstraction-∞-%233f004a)
 
 </div>
 </div>
@@ -19,15 +19,15 @@ It features manual memory management and inherently UTF-8 safe strings.
 
 > The book [Writing An Interpreter In Go](https://interpreterbook.com/) got me started. Highly recommend it!
 
-## What is WesProL?
+## What is Wes?
 
 An amalgamation of Go, Rust, C#, JS, and PHP syntax, maybe some Zig added for flavour.
 
 This ~~is~~ will be a compiler targeting C as its back-end.
 The bootstrapping process will be done entirely in PHP, for personal reasons.
-Once v0.0.1 is fully operable, this entire repository will be rewritten in WesProL (with some C interop).
+Once v0.0.1 is fully operable, this entire repository will be rewritten in Wes (with some C interop).
 
-WesProL is intended to be a compiled general purpose language.
+Wes is intended to be a compiled general purpose language.
 It will feature a vast standard library, hopefully as great as Go, including HTTP server capabilities.
 It also will feature interoperability with C (mostly for reliance on established C libraries to get started).
 
@@ -36,7 +36,7 @@ It also will feature interoperability with C (mostly for reliance on established
 You don't. Not yet.
 
 You can run the [hand compiled examples](./c_manually_compiled_examples) to see that the resulting C works.
-So far no process exists to automatically generate C from WesProL source.
+So far no process exists to automatically generate C from Wes source.
 
 ## Why create another pointless imperative/object-oriented language?
 
@@ -598,7 +598,7 @@ public function foo() void {
 
 ### C interop
 
-`$PROJECT_DIR$/wesprol.toml`
+`$PROJECT_DIR$/wes.toml`
 ```toml
 [project]
 # TODO
@@ -657,7 +657,7 @@ class Program {
 
 ### References
 
-> IMPORTANT: The WesProL dereference operator `*` has higher binding power than C.
+> IMPORTANT: The Wes dereference operator `*` has higher binding power than C.
 > 
 > It always dereferences the variable next to it.
 > 
@@ -797,5 +797,6 @@ public function demo(name string, role Role = Role::User) {
 
 - named arguments
 - static null safe accessor `?::`
-- Attributes (available through reflection)
+- attributes (available through reflection)
+- variadic functions
 - ...

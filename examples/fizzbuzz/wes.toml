@@ -1,5 +1,5 @@
 [project]
-name="wesprol-examples/fizzbuzz"
+name="wes-examples/fizzbuzz"
 type="project"
 
 [project.source]
